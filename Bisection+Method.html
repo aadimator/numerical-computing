@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8" />
-<title>index</title>
+<title>Bisection Method</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
@@ -11751,7 +11751,7 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="Numerical-Computing">Numerical Computing<a class="anchor-link" href="#Numerical-Computing">&#182;</a></h1><h4 id="Notes-by-Aadam---@aadimator">Notes by Aadam - @aadimator<a class="anchor-link" href="#Notes-by-Aadam---@aadimator">&#182;</a></h4>
+<h1 id="The-Bisection-Method">The Bisection Method<a class="anchor-link" href="#The-Bisection-Method">&#182;</a></h1>
 </div>
 </div>
 </div>
@@ -11760,9 +11760,4477 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Chapter-2">Chapter 2<a class="anchor-link" href="#Chapter-2">&#182;</a></h2><h3 id="2.1-The-Bisection-Method">2.1 <a href="Bisection+Method.html">The Bisection Method</a><a class="anchor-link" href="#2.1-The-Bisection-Method">&#182;</a></h3>
+<h2 id="Algorithm">Algorithm<a class="anchor-link" href="#Algorithm">&#182;</a></h2>
 </div>
 </div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">To find a solution to f(x) = 0 given the continuous function f on the interval [a,b], where f(a) and f(b) have opposite signs:</span>
+<span class="sd">INPUT endpoints a,b; tolerance TOL; maximum number of iterations N₀.</span>
+<span class="sd">OUTPUT approximate solution p or message of failure.</span>
+<span class="sd">Step 1 Set i = 1;</span>
+<span class="sd">         FA = f(a).</span>
+<span class="sd">Step 2 While i ≤ N₀ do Steps 3–6.</span>
+<span class="sd">Step 3 Set p = a + (b − a)/2; (Compute pᵢ.)</span>
+<span class="sd">         FP = f(p).</span>
+<span class="sd">Step 4 If FP = 0 or (b − a)/2 &lt; TOL then</span>
+<span class="sd">         OUTPUT (p); (Procedure completed successfully.)</span>
+<span class="sd">         STOP.</span>
+<span class="sd">Step 5 Set i = i + 1.</span>
+<span class="sd">Step 6 If FA · FP &gt; 0 then set a = p; (Compute aᵢ ,bᵢ .)</span>
+<span class="sd">         FA = FP</span>
+<span class="sd">         else set b = p. (FA is unchanged.)</span>
+<span class="sd">Step 7 OUTPUT (‘Method failed after N₀ iterations, N₀ =’, N₀ );</span>
+<span class="sd">         (The procedure was unsuccessful.)</span>
+<span class="sd">         STOP. </span>
+<span class="sd">&#39;&#39;&#39;</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Code">Code<a class="anchor-link" href="#Code">&#182;</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[22]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[23]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">Bisection</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">0.000001</span><span class="p">,</span> <span class="n">max_iterations</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s1">&#39;answer&#39;</span><span class="p">,</span> <span class="n">stopping_criterion</span><span class="o">=</span><span class="s1">&#39;tolerance&#39;</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The Bisection Algorithm</span>
+
+<span class="sd">    Keyword arguments:</span>
+<span class="sd">    a (double) -- starting interval</span>
+<span class="sd">    b (double) -- ending interval</span>
+<span class="sd">    f (function) -- function defined on interval</span>
+<span class="sd">    tolerance (double) -- error tolerance (default = 0.000001)</span>
+<span class="sd">    max_iterations (int) -- number of maximum iterations (default = 100)</span>
+<span class="sd">    output (string) -- how to output the result (default = &#39;answer&#39;)</span>
+<span class="sd">                possible values are:</span>
+<span class="sd">                  - &#39;answer&#39; : to show the value of &quot;p&quot;</span>
+<span class="sd">                  - &#39;table&#39; : to show all the values in tabular form</span>
+<span class="sd">    stopping_criterion (string) -- when to stop the processing (default = &#39;tolerance&#39;)</span>
+<span class="sd">                possible vaulse are:</span>
+<span class="sd">                  - &#39;tolerance&#39; : to stop at a certain tolerance level</span>
+<span class="sd">                  - &#39;iteration&#39; : to stop at a certain iteration (must provide value for &#39;iteration&#39; argument)</span>
+<span class="sd">    iteration (int) -- on which iteration to stop the processing (default = 100)</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">    </span>
+<span class="sd">    bool: False if there&#39;s a problem</span>
+<span class="sd">    </span>
+<span class="sd">    Otherwise it will return the value according to the value in &#39;output&#39; argument.</span>
+<span class="sd">    If value of output is &#39;answer&#39;, it will return a float. If it is &#39;table&#39;, it will return a DataFrame.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># check if &#39;f&#39; is a function</span>
+    <span class="k">if</span><span class="p">(</span><span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">f</span><span class="p">)):</span>
+        <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;Please provide a function &#39;f&#39;&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    
+    <span class="n">fa</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="n">fb</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+    <span class="c1"># check if fa and fb have the same signs</span>
+    <span class="k">if</span> <span class="p">((</span><span class="n">fa</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">fb</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">fa</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">fb</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)):</span>
+        <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;This problem is unsolvable as&quot;</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;f(a) = &quot;</span><span class="p">,</span> <span class="n">fa</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;f(b) = &quot;</span><span class="p">,</span> <span class="n">fb</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;They are both &quot;</span><span class="p">,</span> <span class="s2">&quot;negative.&quot;</span> <span class="k">if</span> <span class="n">fa</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="s2">&quot;positive.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    
+    <span class="n">A</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="n">B</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="n">FA</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="n">FB</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="n">FP</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_iterations</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="p">(</span><span class="n">b</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span>
+        <span class="n">fp</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        
+        <span class="n">A</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+        <span class="n">B</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+        <span class="n">P</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="n">FA</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fa</span><span class="p">)</span>
+        <span class="n">FB</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fb</span><span class="p">)</span>
+        <span class="n">FP</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="p">(</span><span class="n">fp</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">(</span><span class="n">b</span><span class="o">-</span><span class="n">a</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span> <span class="o">&lt;</span> <span class="n">tolerance</span> <span class="ow">or</span> <span class="p">(</span><span class="n">stopping_criterion</span> <span class="o">==</span> <span class="s1">&#39;iteration&#39;</span> <span class="ow">and</span> <span class="n">iteration</span> <span class="o">==</span> <span class="n">i</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">output</span> <span class="o">==</span> <span class="s1">&#39;answer&#39;</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">p</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">output</span> <span class="o">==</span> <span class="s1">&#39;table&#39;</span><span class="p">):</span>
+                <span class="c1"># create a table and return it</span>
+                <span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span> <span class="n">A</span><span class="p">,</span> <span class="s1">&#39;f(a)&#39;</span><span class="p">:</span> <span class="n">FA</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span> <span class="p">:</span> <span class="n">B</span><span class="p">,</span> <span class="s1">&#39;f(b)&#39;</span> <span class="p">:</span> <span class="n">FB</span><span class="p">,</span> <span class="s1">&#39;p&#39;</span> <span class="p">:</span> <span class="n">P</span><span class="p">,</span> <span class="s1">&#39;f(p)&#39;</span><span class="p">:</span> <span class="n">FP</span><span class="p">}</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">d</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;f(a)&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;f(b)&#39;</span><span class="p">,</span> <span class="s1">&#39;p&#39;</span><span class="p">,</span> <span class="s1">&#39;f(p)&#39;</span><span class="p">])</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="k">return</span> <span class="n">df</span>
+        
+        <span class="k">if</span> <span class="p">(</span><span class="n">fa</span> <span class="o">*</span> <span class="n">fp</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span> 
+            <span class="n">a</span> <span class="o">=</span> <span class="n">p</span>
+            <span class="n">fa</span> <span class="o">=</span> <span class="n">fp</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">p</span>
+            <span class="n">fb</span> <span class="o">=</span> <span class="n">fp</span>
+    
+    <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;Method failed after &quot;</span><span class="p">,</span> <span class="n">max_iterations</span><span class="p">,</span> <span class="s2">&quot; iterations.&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">False</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Example-1">Example 1<a class="anchor-link" href="#Example-1">&#182;</a></h3><p>Show that f(x) = x³ + 4x² − 10 = 0 has a root in [1,2], and use the Bisection method to determine an approximation to the root that is accurate to at least within 10⁻⁴</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[24]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">+</span> <span class="mi">4</span> <span class="o">*</span> <span class="nb">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="mi">10</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[25]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Bisection</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">Out[25]:</div>
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>a</th>
+      <th>f(a)</th>
+      <th>b</th>
+      <th>f(b)</th>
+      <th>p</th>
+      <th>f(p)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1</th>
+      <td>1.000000</td>
+      <td>-5.000000</td>
+      <td>2.000000</td>
+      <td>14.000000</td>
+      <td>1.500000</td>
+      <td>2.375000</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>1.000000</td>
+      <td>-5.000000</td>
+      <td>1.500000</td>
+      <td>2.375000</td>
+      <td>1.250000</td>
+      <td>-1.796875</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>1.250000</td>
+      <td>-1.796875</td>
+      <td>1.500000</td>
+      <td>2.375000</td>
+      <td>1.375000</td>
+      <td>0.162109</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>1.250000</td>
+      <td>-1.796875</td>
+      <td>1.375000</td>
+      <td>0.162109</td>
+      <td>1.312500</td>
+      <td>-0.848389</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>1.312500</td>
+      <td>-0.848389</td>
+      <td>1.375000</td>
+      <td>0.162109</td>
+      <td>1.343750</td>
+      <td>-0.350983</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>1.343750</td>
+      <td>-0.350983</td>
+      <td>1.375000</td>
+      <td>0.162109</td>
+      <td>1.359375</td>
+      <td>-0.096409</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>1.359375</td>
+      <td>-0.096409</td>
+      <td>1.375000</td>
+      <td>0.162109</td>
+      <td>1.367188</td>
+      <td>0.032356</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>1.359375</td>
+      <td>-0.096409</td>
+      <td>1.367188</td>
+      <td>0.032356</td>
+      <td>1.363281</td>
+      <td>-0.032150</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>1.363281</td>
+      <td>-0.032150</td>
+      <td>1.367188</td>
+      <td>0.032356</td>
+      <td>1.365234</td>
+      <td>0.000072</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>1.363281</td>
+      <td>-0.032150</td>
+      <td>1.365234</td>
+      <td>0.000072</td>
+      <td>1.364258</td>
+      <td>-0.016047</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>1.364258</td>
+      <td>-0.016047</td>
+      <td>1.365234</td>
+      <td>0.000072</td>
+      <td>1.364746</td>
+      <td>-0.007989</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>1.364746</td>
+      <td>-0.007989</td>
+      <td>1.365234</td>
+      <td>0.000072</td>
+      <td>1.364990</td>
+      <td>-0.003959</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>1.364990</td>
+      <td>-0.003959</td>
+      <td>1.365234</td>
+      <td>0.000072</td>
+      <td>1.365112</td>
+      <td>-0.001944</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>1.365112</td>
+      <td>-0.001944</td>
+      <td>1.365234</td>
+      <td>0.000072</td>
+      <td>1.365173</td>
+      <td>-0.000936</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[26]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The answer is : &quot;</span> <span class="p">,</span> <span class="n">Bisection</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;answer&quot;</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>The answer is :  1.36517334
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Exercise-Set-2.1">Exercise Set 2.1<a class="anchor-link" href="#Exercise-Set-2.1">&#182;</a></h1>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="(1)-Use-the-Bisection-method-to-find-p&#8323;-for-f(x)-=-&#8730;x-&#8722;-cosx-on-[0,1].">(1) Use the Bisection method to find p&#8323; for f(x) = &#8730;x &#8722; cosx on [0,1].<a class="anchor-link" href="#(1)-Use-the-Bisection-method-to-find-p&#8323;-for-f(x)-=-&#8730;x-&#8722;-cosx-on-[0,1].">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[27]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">math</span>
+<span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[28]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Bisection</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">,</span> <span class="n">stopping_criterion</span><span class="o">=</span><span class="s1">&#39;iteration&#39;</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">Out[28]:</div>
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>a</th>
+      <th>f(a)</th>
+      <th>b</th>
+      <th>f(b)</th>
+      <th>p</th>
+      <th>f(p)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1</th>
+      <td>0.0</td>
+      <td>-1.000000</td>
+      <td>1.00</td>
+      <td>0.459698</td>
+      <td>0.500</td>
+      <td>-0.170476</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.5</td>
+      <td>-0.170476</td>
+      <td>1.00</td>
+      <td>0.459698</td>
+      <td>0.750</td>
+      <td>0.134337</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0.5</td>
+      <td>-0.170476</td>
+      <td>0.75</td>
+      <td>0.134337</td>
+      <td>0.625</td>
+      <td>-0.020394</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[29]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The answer is : &quot;</span> <span class="p">,</span> <span class="n">Bisection</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;answer&quot;</span><span class="p">,</span> <span class="n">stopping_criterion</span><span class="o">=</span><span class="s1">&#39;iteration&#39;</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>The answer is :  0.625
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="(2)-Let-f(x)-=-3(x-+-1)(x-&#8722;1/2)(x-&#8722;-1).-Use-the-Bisection-method-on-the-following-intervals-to-find-p&#8323;">(2) Let f(x) = 3(x + 1)(x &#8722;1/2)(x &#8722; 1). Use the Bisection method on the following intervals to find p&#8323;<a class="anchor-link" href="#(2)-Let-f(x)-=-3(x-+-1)(x-&#8722;1/2)(x-&#8722;-1).-Use-the-Bisection-method-on-the-following-intervals-to-find-p&#8323;">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[30]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mi">3</span><span class="o">*</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h4 id="a.-[-2,-1.5]">a. [-2, 1.5]<a class="anchor-link" href="#a.-[-2,-1.5]">&#182;</a></h4>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[31]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Bisection</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">,</span> <span class="n">stopping_criterion</span><span class="o">=</span><span class="s1">&#39;iteration&#39;</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">Out[31]:</div>
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>a</th>
+      <th>f(a)</th>
+      <th>b</th>
+      <th>f(b)</th>
+      <th>p</th>
+      <th>f(p)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1</th>
+      <td>-2.000</td>
+      <td>-22.500000</td>
+      <td>1.50</td>
+      <td>3.750000</td>
+      <td>-0.2500</td>
+      <td>2.109375</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>-2.000</td>
+      <td>-22.500000</td>
+      <td>-0.25</td>
+      <td>2.109375</td>
+      <td>-1.1250</td>
+      <td>-1.294922</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>-1.125</td>
+      <td>-1.294922</td>
+      <td>-0.25</td>
+      <td>2.109375</td>
+      <td>-0.6875</td>
+      <td>1.878662</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[32]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The answer is : &quot;</span> <span class="p">,</span> <span class="n">Bisection</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;answer&quot;</span><span class="p">,</span> <span class="n">stopping_criterion</span><span class="o">=</span><span class="s1">&#39;iteration&#39;</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>The answer is :  -0.6875
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h4 id="b.-[&#8722;1.25,2.5]">b. [&#8722;1.25,2.5]<a class="anchor-link" href="#b.-[&#8722;1.25,2.5]">&#182;</a></h4>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[33]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Bisection</span><span class="p">(</span><span class="o">-</span><span class="mf">1.25</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">,</span> <span class="n">stopping_criterion</span><span class="o">=</span><span class="s1">&#39;iteration&#39;</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">Out[33]:</div>
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>a</th>
+      <th>f(a)</th>
+      <th>b</th>
+      <th>f(b)</th>
+      <th>p</th>
+      <th>f(p)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1</th>
+      <td>-1.250</td>
+      <td>-2.953125</td>
+      <td>2.5000</td>
+      <td>31.500000</td>
+      <td>0.62500</td>
+      <td>-0.228516</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.625</td>
+      <td>-0.228516</td>
+      <td>2.5000</td>
+      <td>31.500000</td>
+      <td>1.56250</td>
+      <td>4.594482</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0.625</td>
+      <td>-0.228516</td>
+      <td>1.5625</td>
+      <td>4.594482</td>
+      <td>1.09375</td>
+      <td>0.349640</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[34]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The answer is : &quot;</span> <span class="p">,</span> <span class="n">Bisection</span><span class="p">(</span><span class="o">-</span><span class="mf">1.25</span><span class="p">,</span> <span class="mf">2.5</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;answer&quot;</span><span class="p">,</span> <span class="n">stopping_criterion</span><span class="o">=</span><span class="s1">&#39;iteration&#39;</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>The answer is :  1.09375
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="(3)-Use-the-Bisection-method-to-find-solutions-accurate-to-within-10&#8315;&#178;-for-x&#179;-&#8722;-7x&#178;-+-14x-&#8722;-6-=-0-on-each-interval.">(3) Use the Bisection method to find solutions accurate to within 10&#8315;&#178; for x&#179; &#8722; 7x&#178; + 14x &#8722; 6 = 0 on each interval.<a class="anchor-link" href="#(3)-Use-the-Bisection-method-to-find-solutions-accurate-to-within-10&#8315;&#178;-for-x&#179;-&#8722;-7x&#178;-+-14x-&#8722;-6-=-0-on-each-interval.">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[35]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-</span> <span class="mi">7</span><span class="o">*</span><span class="nb">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">14</span><span class="o">*</span><span class="n">x</span> <span class="o">-</span> <span class="mi">6</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h4 id="a.-[0,1]">a. [0,1]<a class="anchor-link" href="#a.-[0,1]">&#182;</a></h4>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[36]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Bisection</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">Out[36]:</div>
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>a</th>
+      <th>f(a)</th>
+      <th>b</th>
+      <th>f(b)</th>
+      <th>p</th>
+      <th>f(p)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1</th>
+      <td>0.000000</td>
+      <td>-6.000000</td>
+      <td>1.00000</td>
+      <td>2.000000</td>
+      <td>0.500000</td>
+      <td>-0.625000</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.500000</td>
+      <td>-0.625000</td>
+      <td>1.00000</td>
+      <td>2.000000</td>
+      <td>0.750000</td>
+      <td>0.984375</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0.500000</td>
+      <td>-0.625000</td>
+      <td>0.75000</td>
+      <td>0.984375</td>
+      <td>0.625000</td>
+      <td>0.259766</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0.500000</td>
+      <td>-0.625000</td>
+      <td>0.62500</td>
+      <td>0.259766</td>
+      <td>0.562500</td>
+      <td>-0.161865</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>0.562500</td>
+      <td>-0.161865</td>
+      <td>0.62500</td>
+      <td>0.259766</td>
+      <td>0.593750</td>
+      <td>0.054047</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>0.562500</td>
+      <td>-0.161865</td>
+      <td>0.59375</td>
+      <td>0.054047</td>
+      <td>0.578125</td>
+      <td>-0.052624</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>0.578125</td>
+      <td>-0.052624</td>
+      <td>0.59375</td>
+      <td>0.054047</td>
+      <td>0.585938</td>
+      <td>0.001031</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[37]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The answer is : &quot;</span> <span class="p">,</span> <span class="n">Bisection</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;answer&quot;</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>The answer is :  0.5859375
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h4 id="b.-[1,3.2]">b. [1,3.2]<a class="anchor-link" href="#b.-[1,3.2]">&#182;</a></h4>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[38]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Bisection</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">3.2</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">Out[38]:</div>
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>a</th>
+      <th>f(a)</th>
+      <th>b</th>
+      <th>f(b)</th>
+      <th>p</th>
+      <th>f(p)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1</th>
+      <td>1.00000</td>
+      <td>2.000000</td>
+      <td>3.200000</td>
+      <td>-0.112000</td>
+      <td>2.100000</td>
+      <td>1.791000</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2.10000</td>
+      <td>1.791000</td>
+      <td>3.200000</td>
+      <td>-0.112000</td>
+      <td>2.650000</td>
+      <td>0.552125</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2.65000</td>
+      <td>0.552125</td>
+      <td>3.200000</td>
+      <td>-0.112000</td>
+      <td>2.925000</td>
+      <td>0.085828</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2.92500</td>
+      <td>0.085828</td>
+      <td>3.200000</td>
+      <td>-0.112000</td>
+      <td>3.062500</td>
+      <td>-0.054443</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>2.92500</td>
+      <td>0.085828</td>
+      <td>3.062500</td>
+      <td>-0.054443</td>
+      <td>2.993750</td>
+      <td>0.006328</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>2.99375</td>
+      <td>0.006328</td>
+      <td>3.062500</td>
+      <td>-0.054443</td>
+      <td>3.028125</td>
+      <td>-0.026521</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>2.99375</td>
+      <td>0.006328</td>
+      <td>3.028125</td>
+      <td>-0.026521</td>
+      <td>3.010937</td>
+      <td>-0.010697</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>2.99375</td>
+      <td>0.006328</td>
+      <td>3.010937</td>
+      <td>-0.010697</td>
+      <td>3.002344</td>
+      <td>-0.002333</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[39]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The answer is : &quot;</span> <span class="p">,</span> <span class="n">Bisection</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">3.2</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;answer&quot;</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>The answer is :  3.00234375
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h4 id="c.-[3.2,4]">c. [3.2,4]<a class="anchor-link" href="#c.-[3.2,4]">&#182;</a></h4>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[40]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Bisection</span><span class="p">(</span><span class="mf">3.2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">Out[40]:</div>
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>a</th>
+      <th>f(a)</th>
+      <th>b</th>
+      <th>f(b)</th>
+      <th>p</th>
+      <th>f(p)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1</th>
+      <td>3.2000</td>
+      <td>-0.112000</td>
+      <td>4.000</td>
+      <td>2.000000</td>
+      <td>3.60000</td>
+      <td>0.336000</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3.2000</td>
+      <td>-0.112000</td>
+      <td>3.600</td>
+      <td>0.336000</td>
+      <td>3.40000</td>
+      <td>-0.016000</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>3.4000</td>
+      <td>-0.016000</td>
+      <td>3.600</td>
+      <td>0.336000</td>
+      <td>3.50000</td>
+      <td>0.125000</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>3.4000</td>
+      <td>-0.016000</td>
+      <td>3.500</td>
+      <td>0.125000</td>
+      <td>3.45000</td>
+      <td>0.046125</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>3.4000</td>
+      <td>-0.016000</td>
+      <td>3.450</td>
+      <td>0.046125</td>
+      <td>3.42500</td>
+      <td>0.013016</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>3.4000</td>
+      <td>-0.016000</td>
+      <td>3.425</td>
+      <td>0.013016</td>
+      <td>3.41250</td>
+      <td>-0.001998</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>3.4125</td>
+      <td>-0.001998</td>
+      <td>3.425</td>
+      <td>0.013016</td>
+      <td>3.41875</td>
+      <td>0.005382</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[41]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The answer is : &quot;</span> <span class="p">,</span> <span class="n">Bisection</span><span class="p">(</span><span class="mf">3.2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;answer&quot;</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>The answer is :  3.41875
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="(4)-Use-the-Bisection-method-to-find-solutions-accurate-to-within-10&#8315;&#178;-for-x&#8308;-&#8722;-2x&#179;-&#8722;-4x&#178;-+-4x-+-4-=-0-on-each-interval.">(4) Use the Bisection method to find solutions accurate to within 10&#8315;&#178; for x&#8308; &#8722; 2x&#179; &#8722; 4x&#178; + 4x + 4 = 0 on each interval.<a class="anchor-link" href="#(4)-Use-the-Bisection-method-to-find-solutions-accurate-to-within-10&#8315;&#178;-for-x&#8308;-&#8722;-2x&#179;-&#8722;-4x&#178;-+-4x-+-4-=-0-on-each-interval.">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[42]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="nb">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-</span> <span class="mi">4</span><span class="o">*</span><span class="nb">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">4</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">4</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h4 id="a.-[&#8722;2,&#8722;1]">a. [&#8722;2,&#8722;1]<a class="anchor-link" href="#a.-[&#8722;2,&#8722;1]">&#182;</a></h4>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[43]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Bisection</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">Out[43]:</div>
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>a</th>
+      <th>f(a)</th>
+      <th>b</th>
+      <th>f(b)</th>
+      <th>p</th>
+      <th>f(p)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1</th>
+      <td>-2.000000</td>
+      <td>12.000000</td>
+      <td>-1.00000</td>
+      <td>-1.000000</td>
+      <td>-1.500000</td>
+      <td>0.812500</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>-1.500000</td>
+      <td>0.812500</td>
+      <td>-1.00000</td>
+      <td>-1.000000</td>
+      <td>-1.250000</td>
+      <td>-0.902344</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>-1.500000</td>
+      <td>0.812500</td>
+      <td>-1.25000</td>
+      <td>-0.902344</td>
+      <td>-1.375000</td>
+      <td>-0.288818</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>-1.500000</td>
+      <td>0.812500</td>
+      <td>-1.37500</td>
+      <td>-0.288818</td>
+      <td>-1.437500</td>
+      <td>0.195328</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>-1.437500</td>
+      <td>0.195328</td>
+      <td>-1.37500</td>
+      <td>-0.288818</td>
+      <td>-1.406250</td>
+      <td>-0.062667</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>-1.437500</td>
+      <td>0.195328</td>
+      <td>-1.40625</td>
+      <td>-0.062667</td>
+      <td>-1.421875</td>
+      <td>0.062263</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>-1.421875</td>
+      <td>0.062263</td>
+      <td>-1.40625</td>
+      <td>-0.062667</td>
+      <td>-1.414062</td>
+      <td>-0.001208</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[44]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The answer is : &quot;</span> <span class="p">,</span> <span class="n">Bisection</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;answer&quot;</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>The answer is :  -1.4140625
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h4 id="b.-[0,2]">b. [0,2]<a class="anchor-link" href="#b.-[0,2]">&#182;</a></h4>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[45]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Bisection</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">Out[45]:</div>
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>a</th>
+      <th>f(a)</th>
+      <th>b</th>
+      <th>f(b)</th>
+      <th>p</th>
+      <th>f(p)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1</th>
+      <td>0.00000</td>
+      <td>4.000000</td>
+      <td>2.000000</td>
+      <td>-4.000000</td>
+      <td>1.000000</td>
+      <td>3.000000</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>1.00000</td>
+      <td>3.000000</td>
+      <td>2.000000</td>
+      <td>-4.000000</td>
+      <td>1.500000</td>
+      <td>-0.687500</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>1.00000</td>
+      <td>3.000000</td>
+      <td>1.500000</td>
+      <td>-0.687500</td>
+      <td>1.250000</td>
+      <td>1.285156</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>1.25000</td>
+      <td>1.285156</td>
+      <td>1.500000</td>
+      <td>-0.687500</td>
+      <td>1.375000</td>
+      <td>0.312744</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>1.37500</td>
+      <td>0.312744</td>
+      <td>1.500000</td>
+      <td>-0.687500</td>
+      <td>1.437500</td>
+      <td>-0.186508</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>1.37500</td>
+      <td>0.312744</td>
+      <td>1.437500</td>
+      <td>-0.186508</td>
+      <td>1.406250</td>
+      <td>0.063676</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>1.40625</td>
+      <td>0.063676</td>
+      <td>1.437500</td>
+      <td>-0.186508</td>
+      <td>1.421875</td>
+      <td>-0.061318</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>1.40625</td>
+      <td>0.063676</td>
+      <td>1.421875</td>
+      <td>-0.061318</td>
+      <td>1.414062</td>
+      <td>0.001208</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[46]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The answer is : &quot;</span> <span class="p">,</span> <span class="n">Bisection</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;answer&quot;</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>The answer is :  1.4140625
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h4 id="c.-[2,3]">c. [2,3]<a class="anchor-link" href="#c.-[2,3]">&#182;</a></h4>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[47]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Bisection</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">Out[47]:</div>
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>a</th>
+      <th>f(a)</th>
+      <th>b</th>
+      <th>f(b)</th>
+      <th>p</th>
+      <th>f(p)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1</th>
+      <td>2.00000</td>
+      <td>-4.000000</td>
+      <td>3.000000</td>
+      <td>7.000000</td>
+      <td>2.500000</td>
+      <td>-3.187500</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>2.50000</td>
+      <td>-3.187500</td>
+      <td>3.000000</td>
+      <td>7.000000</td>
+      <td>2.750000</td>
+      <td>0.347656</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>2.50000</td>
+      <td>-3.187500</td>
+      <td>2.750000</td>
+      <td>0.347656</td>
+      <td>2.625000</td>
+      <td>-1.757568</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>2.62500</td>
+      <td>-1.757568</td>
+      <td>2.750000</td>
+      <td>0.347656</td>
+      <td>2.687500</td>
+      <td>-0.795639</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>2.68750</td>
+      <td>-0.795639</td>
+      <td>2.750000</td>
+      <td>0.347656</td>
+      <td>2.718750</td>
+      <td>-0.247466</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>2.71875</td>
+      <td>-0.247466</td>
+      <td>2.750000</td>
+      <td>0.347656</td>
+      <td>2.734375</td>
+      <td>0.044125</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>2.71875</td>
+      <td>-0.247466</td>
+      <td>2.734375</td>
+      <td>0.044125</td>
+      <td>2.726562</td>
+      <td>-0.103151</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[48]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The answer is : &quot;</span> <span class="p">,</span> <span class="n">Bisection</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;answer&quot;</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>The answer is :  2.7265625
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h4 id="d.-[&#8722;1,0]">d. [&#8722;1,0]<a class="anchor-link" href="#d.-[&#8722;1,0]">&#182;</a></h4>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[49]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Bisection</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">Out[49]:</div>
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>a</th>
+      <th>f(a)</th>
+      <th>b</th>
+      <th>f(b)</th>
+      <th>p</th>
+      <th>f(p)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1</th>
+      <td>-1.000000</td>
+      <td>-1.000000</td>
+      <td>0.00000</td>
+      <td>4.000000</td>
+      <td>-0.500000</td>
+      <td>1.312500</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>-1.000000</td>
+      <td>-1.000000</td>
+      <td>-0.50000</td>
+      <td>1.312500</td>
+      <td>-0.750000</td>
+      <td>-0.089844</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>-0.750000</td>
+      <td>-0.089844</td>
+      <td>-0.50000</td>
+      <td>1.312500</td>
+      <td>-0.625000</td>
+      <td>0.578369</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>-0.750000</td>
+      <td>-0.089844</td>
+      <td>-0.62500</td>
+      <td>0.578369</td>
+      <td>-0.687500</td>
+      <td>0.232681</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>-0.750000</td>
+      <td>-0.089844</td>
+      <td>-0.68750</td>
+      <td>0.232681</td>
+      <td>-0.718750</td>
+      <td>0.068086</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>-0.750000</td>
+      <td>-0.089844</td>
+      <td>-0.71875</td>
+      <td>0.068086</td>
+      <td>-0.734375</td>
+      <td>-0.011768</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>-0.734375</td>
+      <td>-0.011768</td>
+      <td>-0.71875</td>
+      <td>0.068086</td>
+      <td>-0.726562</td>
+      <td>0.027943</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[50]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The answer is : &quot;</span> <span class="p">,</span> <span class="n">Bisection</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;answer&quot;</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>The answer is :  -0.7265625
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="(5)-Use-the-Bisection-method-to-find-solutions-accurate-to-within-10-&#8722;5-for-the-following-problems.">(5) Use the Bisection method to find solutions accurate to within 10 &#8722;5 for the following problems.<a class="anchor-link" href="#(5)-Use-the-Bisection-method-to-find-solutions-accurate-to-within-10-&#8722;5-for-the-following-problems.">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="a.-x-&#8722;-2&#8315;&#739;-=-0-for-0-&#8804;-x-&#8804;-1">a. x &#8722; 2&#8315;&#739; = 0 for 0 &#8804; x &#8804; 1<a class="anchor-link" href="#a.-x-&#8722;-2&#8315;&#739;-=-0-for-0-&#8804;-x-&#8804;-1">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[51]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">x</span> <span class="o">-</span> <span class="nb">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="n">x</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[52]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Bisection</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">Out[52]:</div>
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>a</th>
+      <th>f(a)</th>
+      <th>b</th>
+      <th>f(b)</th>
+      <th>p</th>
+      <th>f(p)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1</th>
+      <td>0.000000</td>
+      <td>-1.000000</td>
+      <td>1.000000</td>
+      <td>0.500000</td>
+      <td>0.500000</td>
+      <td>-0.207107</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.500000</td>
+      <td>-0.207107</td>
+      <td>1.000000</td>
+      <td>0.500000</td>
+      <td>0.750000</td>
+      <td>0.155396</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0.500000</td>
+      <td>-0.207107</td>
+      <td>0.750000</td>
+      <td>0.155396</td>
+      <td>0.625000</td>
+      <td>-0.023420</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0.625000</td>
+      <td>-0.023420</td>
+      <td>0.750000</td>
+      <td>0.155396</td>
+      <td>0.687500</td>
+      <td>0.066571</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>0.625000</td>
+      <td>-0.023420</td>
+      <td>0.687500</td>
+      <td>0.066571</td>
+      <td>0.656250</td>
+      <td>0.021725</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>0.625000</td>
+      <td>-0.023420</td>
+      <td>0.656250</td>
+      <td>0.021725</td>
+      <td>0.640625</td>
+      <td>-0.000810</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>0.640625</td>
+      <td>-0.000810</td>
+      <td>0.656250</td>
+      <td>0.021725</td>
+      <td>0.648438</td>
+      <td>0.010467</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>0.640625</td>
+      <td>-0.000810</td>
+      <td>0.648438</td>
+      <td>0.010467</td>
+      <td>0.644531</td>
+      <td>0.004831</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>0.640625</td>
+      <td>-0.000810</td>
+      <td>0.644531</td>
+      <td>0.004831</td>
+      <td>0.642578</td>
+      <td>0.002011</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>0.640625</td>
+      <td>-0.000810</td>
+      <td>0.642578</td>
+      <td>0.002011</td>
+      <td>0.641602</td>
+      <td>0.000601</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>0.640625</td>
+      <td>-0.000810</td>
+      <td>0.641602</td>
+      <td>0.000601</td>
+      <td>0.641113</td>
+      <td>-0.000105</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>0.641113</td>
+      <td>-0.000105</td>
+      <td>0.641602</td>
+      <td>0.000601</td>
+      <td>0.641357</td>
+      <td>0.000248</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>0.641113</td>
+      <td>-0.000105</td>
+      <td>0.641357</td>
+      <td>0.000248</td>
+      <td>0.641235</td>
+      <td>0.000072</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>0.641113</td>
+      <td>-0.000105</td>
+      <td>0.641235</td>
+      <td>0.000072</td>
+      <td>0.641174</td>
+      <td>-0.000017</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>0.641174</td>
+      <td>-0.000017</td>
+      <td>0.641235</td>
+      <td>0.000072</td>
+      <td>0.641205</td>
+      <td>0.000028</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>0.641174</td>
+      <td>-0.000017</td>
+      <td>0.641205</td>
+      <td>0.000028</td>
+      <td>0.641190</td>
+      <td>0.000006</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>0.641174</td>
+      <td>-0.000017</td>
+      <td>0.641190</td>
+      <td>0.000006</td>
+      <td>0.641182</td>
+      <td>-0.000005</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[53]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The answer is : &quot;</span> <span class="p">,</span> <span class="n">Bisection</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;answer&quot;</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>The answer is :  0.641181945
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="b.-e&#739;-&#8722;-x&#178;-+-3x-&#8722;-2-=-0-for-0-&#8804;-x-&#8804;-1">b. e&#739; &#8722; x&#178; + 3x &#8722; 2 = 0 for 0 &#8804; x &#8804; 1<a class="anchor-link" href="#b.-e&#739;-&#8722;-x&#178;-+-3x-&#8722;-2-=-0-for-0-&#8804;-x-&#8804;-1">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[54]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">math</span>
+
+<span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="nb">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">x</span> <span class="o">-</span> <span class="mi">2</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[55]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Bisection</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">Out[55]:</div>
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>a</th>
+      <th>f(a)</th>
+      <th>b</th>
+      <th>f(b)</th>
+      <th>p</th>
+      <th>f(p)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1</th>
+      <td>0.000000</td>
+      <td>-1.000000</td>
+      <td>1.000000</td>
+      <td>2.718282</td>
+      <td>0.500000</td>
+      <td>8.987213e-01</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.000000</td>
+      <td>-1.000000</td>
+      <td>0.500000</td>
+      <td>0.898721</td>
+      <td>0.250000</td>
+      <td>-2.847458e-02</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0.250000</td>
+      <td>-0.028475</td>
+      <td>0.500000</td>
+      <td>0.898721</td>
+      <td>0.375000</td>
+      <td>4.393664e-01</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0.250000</td>
+      <td>-0.028475</td>
+      <td>0.375000</td>
+      <td>0.439366</td>
+      <td>0.312500</td>
+      <td>2.066817e-01</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>0.250000</td>
+      <td>-0.028475</td>
+      <td>0.312500</td>
+      <td>0.206682</td>
+      <td>0.281250</td>
+      <td>8.943320e-02</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>0.250000</td>
+      <td>-0.028475</td>
+      <td>0.281250</td>
+      <td>0.089433</td>
+      <td>0.265625</td>
+      <td>3.056423e-02</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>0.250000</td>
+      <td>-0.028475</td>
+      <td>0.265625</td>
+      <td>0.030564</td>
+      <td>0.257812</td>
+      <td>1.066368e-03</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>0.250000</td>
+      <td>-0.028475</td>
+      <td>0.257812</td>
+      <td>0.001066</td>
+      <td>0.253906</td>
+      <td>-1.369868e-02</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>0.253906</td>
+      <td>-0.013699</td>
+      <td>0.257812</td>
+      <td>0.001066</td>
+      <td>0.255859</td>
+      <td>-6.314807e-03</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>0.255859</td>
+      <td>-0.006315</td>
+      <td>0.257812</td>
+      <td>0.001066</td>
+      <td>0.256836</td>
+      <td>-2.623880e-03</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>0.256836</td>
+      <td>-0.002624</td>
+      <td>0.257812</td>
+      <td>0.001066</td>
+      <td>0.257324</td>
+      <td>-7.786722e-04</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>0.257324</td>
+      <td>-0.000779</td>
+      <td>0.257812</td>
+      <td>0.001066</td>
+      <td>0.257568</td>
+      <td>1.438707e-04</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>0.257324</td>
+      <td>-0.000779</td>
+      <td>0.257568</td>
+      <td>0.000144</td>
+      <td>0.257446</td>
+      <td>-3.173936e-04</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>0.257446</td>
+      <td>-0.000317</td>
+      <td>0.257568</td>
+      <td>0.000144</td>
+      <td>0.257507</td>
+      <td>-8.676012e-05</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>0.257507</td>
+      <td>-0.000087</td>
+      <td>0.257568</td>
+      <td>0.000144</td>
+      <td>0.257538</td>
+      <td>2.855751e-05</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>0.257507</td>
+      <td>-0.000087</td>
+      <td>0.257538</td>
+      <td>0.000029</td>
+      <td>0.257523</td>
+      <td>-2.910122e-05</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>0.257523</td>
+      <td>-0.000029</td>
+      <td>0.257538</td>
+      <td>0.000029</td>
+      <td>0.257530</td>
+      <td>-2.737264e-07</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[56]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The answer is : &quot;</span> <span class="p">,</span> <span class="n">Bisection</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;answer&quot;</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>The answer is :  0.257530213
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="c.-2x-cos(2x)-&#8722;-(x-+-1)&#178;-=-0-for-&#8722;3-&#8804;-x-&#8804;-&#8722;2-and-&#8722;1-&#8804;-x-&#8804;-0">c. 2x cos(2x) &#8722; (x + 1)&#178; = 0 for &#8722;3 &#8804; x &#8804; &#8722;2 and &#8722;1 &#8804; x &#8804; 0<a class="anchor-link" href="#c.-2x-cos(2x)-&#8722;-(x-+-1)&#178;-=-0-for-&#8722;3-&#8804;-x-&#8804;-&#8722;2-and-&#8722;1-&#8804;-x-&#8804;-0">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[57]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">math</span>
+
+<span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="nb">pow</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[58]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Bisection</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">Out[58]:</div>
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>a</th>
+      <th>f(a)</th>
+      <th>b</th>
+      <th>f(b)</th>
+      <th>p</th>
+      <th>f(p)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1</th>
+      <td>-3.000000</td>
+      <td>-9.761022</td>
+      <td>-2.000000</td>
+      <td>1.614574</td>
+      <td>-2.500000</td>
+      <td>-3.668311</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>-2.500000</td>
+      <td>-3.668311</td>
+      <td>-2.000000</td>
+      <td>1.614574</td>
+      <td>-2.250000</td>
+      <td>-0.613919</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>-2.250000</td>
+      <td>-0.613919</td>
+      <td>-2.000000</td>
+      <td>1.614574</td>
+      <td>-2.125000</td>
+      <td>0.630247</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>-2.250000</td>
+      <td>-0.613919</td>
+      <td>-2.125000</td>
+      <td>0.630247</td>
+      <td>-2.187500</td>
+      <td>0.038076</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>-2.250000</td>
+      <td>-0.613919</td>
+      <td>-2.187500</td>
+      <td>0.038076</td>
+      <td>-2.218750</td>
+      <td>-0.280836</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>-2.218750</td>
+      <td>-0.280836</td>
+      <td>-2.187500</td>
+      <td>0.038076</td>
+      <td>-2.203125</td>
+      <td>-0.119557</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>-2.203125</td>
+      <td>-0.119557</td>
+      <td>-2.187500</td>
+      <td>0.038076</td>
+      <td>-2.195312</td>
+      <td>-0.040279</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>-2.195312</td>
+      <td>-0.040279</td>
+      <td>-2.187500</td>
+      <td>0.038076</td>
+      <td>-2.191406</td>
+      <td>-0.000985</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>-2.191406</td>
+      <td>-0.000985</td>
+      <td>-2.187500</td>
+      <td>0.038076</td>
+      <td>-2.189453</td>
+      <td>0.018574</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>-2.191406</td>
+      <td>-0.000985</td>
+      <td>-2.189453</td>
+      <td>0.018574</td>
+      <td>-2.190430</td>
+      <td>0.008802</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>-2.191406</td>
+      <td>-0.000985</td>
+      <td>-2.190430</td>
+      <td>0.008802</td>
+      <td>-2.190918</td>
+      <td>0.003910</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>-2.191406</td>
+      <td>-0.000985</td>
+      <td>-2.190918</td>
+      <td>0.003910</td>
+      <td>-2.191162</td>
+      <td>0.001463</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>-2.191406</td>
+      <td>-0.000985</td>
+      <td>-2.191162</td>
+      <td>0.001463</td>
+      <td>-2.191284</td>
+      <td>0.000239</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>-2.191406</td>
+      <td>-0.000985</td>
+      <td>-2.191284</td>
+      <td>0.000239</td>
+      <td>-2.191345</td>
+      <td>-0.000373</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>-2.191345</td>
+      <td>-0.000373</td>
+      <td>-2.191284</td>
+      <td>0.000239</td>
+      <td>-2.191315</td>
+      <td>-0.000067</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>-2.191315</td>
+      <td>-0.000067</td>
+      <td>-2.191284</td>
+      <td>0.000239</td>
+      <td>-2.191299</td>
+      <td>0.000086</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>-2.191315</td>
+      <td>-0.000067</td>
+      <td>-2.191299</td>
+      <td>0.000086</td>
+      <td>-2.191307</td>
+      <td>0.000009</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[59]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The answer is : &quot;</span> <span class="p">,</span> <span class="n">Bisection</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;answer&quot;</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>The answer is :  -2.191307068
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[60]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Bisection</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">Out[60]:</div>
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>a</th>
+      <th>f(a)</th>
+      <th>b</th>
+      <th>f(b)</th>
+      <th>p</th>
+      <th>f(p)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1</th>
+      <td>-1.000000</td>
+      <td>0.832294</td>
+      <td>0.000000</td>
+      <td>-1.000000</td>
+      <td>-0.500000</td>
+      <td>-0.790302</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>-1.000000</td>
+      <td>0.832294</td>
+      <td>-0.500000</td>
+      <td>-0.790302</td>
+      <td>-0.750000</td>
+      <td>-0.168606</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>-1.000000</td>
+      <td>0.832294</td>
+      <td>-0.750000</td>
+      <td>-0.168606</td>
+      <td>-0.875000</td>
+      <td>0.296306</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>-0.875000</td>
+      <td>0.296306</td>
+      <td>-0.750000</td>
+      <td>-0.168606</td>
+      <td>-0.812500</td>
+      <td>0.052882</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>-0.812500</td>
+      <td>0.052882</td>
+      <td>-0.750000</td>
+      <td>-0.168606</td>
+      <td>-0.781250</td>
+      <td>-0.060814</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>-0.812500</td>
+      <td>0.052882</td>
+      <td>-0.781250</td>
+      <td>-0.060814</td>
+      <td>-0.796875</td>
+      <td>-0.004681</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>-0.812500</td>
+      <td>0.052882</td>
+      <td>-0.796875</td>
+      <td>-0.004681</td>
+      <td>-0.804688</td>
+      <td>0.023925</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>-0.804688</td>
+      <td>0.023925</td>
+      <td>-0.796875</td>
+      <td>-0.004681</td>
+      <td>-0.800781</td>
+      <td>0.009578</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>-0.800781</td>
+      <td>0.009578</td>
+      <td>-0.796875</td>
+      <td>-0.004681</td>
+      <td>-0.798828</td>
+      <td>0.002438</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>-0.798828</td>
+      <td>0.002438</td>
+      <td>-0.796875</td>
+      <td>-0.004681</td>
+      <td>-0.797852</td>
+      <td>-0.001124</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>-0.798828</td>
+      <td>0.002438</td>
+      <td>-0.797852</td>
+      <td>-0.001124</td>
+      <td>-0.798340</td>
+      <td>0.000656</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>-0.798340</td>
+      <td>0.000656</td>
+      <td>-0.797852</td>
+      <td>-0.001124</td>
+      <td>-0.798096</td>
+      <td>-0.000234</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>-0.798340</td>
+      <td>0.000656</td>
+      <td>-0.798096</td>
+      <td>-0.000234</td>
+      <td>-0.798218</td>
+      <td>0.000211</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>-0.798218</td>
+      <td>0.000211</td>
+      <td>-0.798096</td>
+      <td>-0.000234</td>
+      <td>-0.798157</td>
+      <td>-0.000012</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>-0.798218</td>
+      <td>0.000211</td>
+      <td>-0.798157</td>
+      <td>-0.000012</td>
+      <td>-0.798187</td>
+      <td>0.000100</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>-0.798187</td>
+      <td>0.000100</td>
+      <td>-0.798157</td>
+      <td>-0.000012</td>
+      <td>-0.798172</td>
+      <td>0.000044</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>-0.798172</td>
+      <td>0.000044</td>
+      <td>-0.798157</td>
+      <td>-0.000012</td>
+      <td>-0.798164</td>
+      <td>0.000016</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[61]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The answer is : &quot;</span> <span class="p">,</span> <span class="n">Bisection</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;answer&quot;</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>The answer is :  -0.798164367
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="d.-x-cosx-&#8722;-2x&#178;-+-3x-&#8722;-1-=-0--for---0.2-&#8804;-x-&#8804;-0.3---and---1.2-&#8804;-x-&#8804;-1.3">d. x cosx &#8722; 2x&#178; + 3x &#8722; 1 = 0  for   0.2 &#8804; x &#8804; 0.3   and   1.2 &#8804; x &#8804; 1.3<a class="anchor-link" href="#d.-x-cosx-&#8722;-2x&#178;-+-3x-&#8722;-1-=-0--for---0.2-&#8804;-x-&#8804;-0.3---and---1.2-&#8804;-x-&#8804;-1.3">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[62]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">math</span>
+
+<span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">x</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="nb">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">x</span> <span class="o">-</span> <span class="mi">1</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[63]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Bisection</span><span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">Out[63]:</div>
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>a</th>
+      <th>f(a)</th>
+      <th>b</th>
+      <th>f(b)</th>
+      <th>p</th>
+      <th>f(p)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1</th>
+      <td>0.200000</td>
+      <td>-0.283987</td>
+      <td>0.300000</td>
+      <td>0.006601</td>
+      <td>0.250000</td>
+      <td>-0.132772</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.250000</td>
+      <td>-0.132772</td>
+      <td>0.300000</td>
+      <td>0.006601</td>
+      <td>0.275000</td>
+      <td>-0.061583</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0.275000</td>
+      <td>-0.061583</td>
+      <td>0.300000</td>
+      <td>0.006601</td>
+      <td>0.287500</td>
+      <td>-0.027113</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0.287500</td>
+      <td>-0.027113</td>
+      <td>0.300000</td>
+      <td>0.006601</td>
+      <td>0.293750</td>
+      <td>-0.010161</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>0.293750</td>
+      <td>-0.010161</td>
+      <td>0.300000</td>
+      <td>0.006601</td>
+      <td>0.296875</td>
+      <td>-0.001756</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>0.296875</td>
+      <td>-0.001756</td>
+      <td>0.300000</td>
+      <td>0.006601</td>
+      <td>0.298438</td>
+      <td>0.002428</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>0.296875</td>
+      <td>-0.001756</td>
+      <td>0.298438</td>
+      <td>0.002428</td>
+      <td>0.297656</td>
+      <td>0.000338</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>0.296875</td>
+      <td>-0.001756</td>
+      <td>0.297656</td>
+      <td>0.000338</td>
+      <td>0.297266</td>
+      <td>-0.000709</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>0.297266</td>
+      <td>-0.000709</td>
+      <td>0.297656</td>
+      <td>0.000338</td>
+      <td>0.297461</td>
+      <td>-0.000186</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>0.297461</td>
+      <td>-0.000186</td>
+      <td>0.297656</td>
+      <td>0.000338</td>
+      <td>0.297559</td>
+      <td>0.000076</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>0.297461</td>
+      <td>-0.000186</td>
+      <td>0.297559</td>
+      <td>0.000076</td>
+      <td>0.297510</td>
+      <td>-0.000055</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>0.297510</td>
+      <td>-0.000055</td>
+      <td>0.297559</td>
+      <td>0.000076</td>
+      <td>0.297534</td>
+      <td>0.000011</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>0.297510</td>
+      <td>-0.000055</td>
+      <td>0.297534</td>
+      <td>0.000011</td>
+      <td>0.297522</td>
+      <td>-0.000022</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>0.297522</td>
+      <td>-0.000022</td>
+      <td>0.297534</td>
+      <td>0.000011</td>
+      <td>0.297528</td>
+      <td>-0.000006</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[64]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The answer is : &quot;</span> <span class="p">,</span> <span class="n">Bisection</span><span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;answer&quot;</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>The answer is :  0.297528077
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[65]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Bisection</span><span class="p">(</span><span class="mf">1.2</span><span class="p">,</span> <span class="mf">1.3</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">Out[65]:</div>
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>a</th>
+      <th>f(a)</th>
+      <th>b</th>
+      <th>f(b)</th>
+      <th>p</th>
+      <th>f(p)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1</th>
+      <td>1.200000</td>
+      <td>0.154829</td>
+      <td>1.300000</td>
+      <td>-0.132252</td>
+      <td>1.250000</td>
+      <td>0.019153</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>1.250000</td>
+      <td>0.019153</td>
+      <td>1.300000</td>
+      <td>-0.132252</td>
+      <td>1.275000</td>
+      <td>-0.054585</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>1.250000</td>
+      <td>0.019153</td>
+      <td>1.275000</td>
+      <td>-0.054585</td>
+      <td>1.262500</td>
+      <td>-0.017225</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>1.250000</td>
+      <td>0.019153</td>
+      <td>1.262500</td>
+      <td>-0.017225</td>
+      <td>1.256250</td>
+      <td>0.001087</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>1.256250</td>
+      <td>0.001087</td>
+      <td>1.262500</td>
+      <td>-0.017225</td>
+      <td>1.259375</td>
+      <td>-0.008038</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>1.256250</td>
+      <td>0.001087</td>
+      <td>1.259375</td>
+      <td>-0.008038</td>
+      <td>1.257812</td>
+      <td>-0.003468</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>1.256250</td>
+      <td>0.001087</td>
+      <td>1.257812</td>
+      <td>-0.003468</td>
+      <td>1.257031</td>
+      <td>-0.001189</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>1.256250</td>
+      <td>0.001087</td>
+      <td>1.257031</td>
+      <td>-0.001189</td>
+      <td>1.256641</td>
+      <td>-0.000050</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>1.256250</td>
+      <td>0.001087</td>
+      <td>1.256641</td>
+      <td>-0.000050</td>
+      <td>1.256445</td>
+      <td>0.000518</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>1.256445</td>
+      <td>0.000518</td>
+      <td>1.256641</td>
+      <td>-0.000050</td>
+      <td>1.256543</td>
+      <td>0.000234</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>1.256543</td>
+      <td>0.000234</td>
+      <td>1.256641</td>
+      <td>-0.000050</td>
+      <td>1.256592</td>
+      <td>0.000092</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>1.256592</td>
+      <td>0.000092</td>
+      <td>1.256641</td>
+      <td>-0.000050</td>
+      <td>1.256616</td>
+      <td>0.000021</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>1.256616</td>
+      <td>0.000021</td>
+      <td>1.256641</td>
+      <td>-0.000050</td>
+      <td>1.256628</td>
+      <td>-0.000015</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>1.256616</td>
+      <td>0.000021</td>
+      <td>1.256628</td>
+      <td>-0.000015</td>
+      <td>1.256622</td>
+      <td>0.000003</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[66]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The answer is : &quot;</span> <span class="p">,</span> <span class="n">Bisection</span><span class="p">(</span><span class="mf">1.2</span><span class="p">,</span> <span class="mf">1.3</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;answer&quot;</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>The answer is :  1.256622314
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="(6)-Use-the-Bisection-method-to-find-solutions,-accurate-to-within-10&#8315;&#8309;-for-the-following-problems.">(6) Use the Bisection method to find solutions, accurate to within 10&#8315;&#8309; for the following problems.<a class="anchor-link" href="#(6)-Use-the-Bisection-method-to-find-solutions,-accurate-to-within-10&#8315;&#8309;-for-the-following-problems.">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="a.-3x-&#8722;-e&#739;-=-0-for-1-&#8804;-x-&#8804;-2">a. 3x &#8722; e&#739; = 0 for 1 &#8804; x &#8804; 2<a class="anchor-link" href="#a.-3x-&#8722;-e&#739;-=-0-for-1-&#8804;-x-&#8804;-2">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[67]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">math</span>
+
+<span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mi">3</span><span class="o">*</span><span class="n">x</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[68]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Bisection</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">Out[68]:</div>
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>a</th>
+      <th>f(a)</th>
+      <th>b</th>
+      <th>f(b)</th>
+      <th>p</th>
+      <th>f(p)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1</th>
+      <td>1.000000</td>
+      <td>0.281718</td>
+      <td>2.000000</td>
+      <td>-1.389056</td>
+      <td>1.500000</td>
+      <td>0.018311</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>1.500000</td>
+      <td>0.018311</td>
+      <td>2.000000</td>
+      <td>-1.389056</td>
+      <td>1.750000</td>
+      <td>-0.504603</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>1.500000</td>
+      <td>0.018311</td>
+      <td>1.750000</td>
+      <td>-0.504603</td>
+      <td>1.625000</td>
+      <td>-0.203419</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>1.500000</td>
+      <td>0.018311</td>
+      <td>1.625000</td>
+      <td>-0.203419</td>
+      <td>1.562500</td>
+      <td>-0.083233</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>1.500000</td>
+      <td>0.018311</td>
+      <td>1.562500</td>
+      <td>-0.083233</td>
+      <td>1.531250</td>
+      <td>-0.030203</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>1.500000</td>
+      <td>0.018311</td>
+      <td>1.531250</td>
+      <td>-0.030203</td>
+      <td>1.515625</td>
+      <td>-0.005390</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>1.500000</td>
+      <td>0.018311</td>
+      <td>1.515625</td>
+      <td>-0.005390</td>
+      <td>1.507812</td>
+      <td>0.006598</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>1.507812</td>
+      <td>0.006598</td>
+      <td>1.515625</td>
+      <td>-0.005390</td>
+      <td>1.511719</td>
+      <td>0.000638</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>1.511719</td>
+      <td>0.000638</td>
+      <td>1.515625</td>
+      <td>-0.005390</td>
+      <td>1.513672</td>
+      <td>-0.002367</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>1.511719</td>
+      <td>0.000638</td>
+      <td>1.513672</td>
+      <td>-0.002367</td>
+      <td>1.512695</td>
+      <td>-0.000862</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>1.511719</td>
+      <td>0.000638</td>
+      <td>1.512695</td>
+      <td>-0.000862</td>
+      <td>1.512207</td>
+      <td>-0.000111</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>1.511719</td>
+      <td>0.000638</td>
+      <td>1.512207</td>
+      <td>-0.000111</td>
+      <td>1.511963</td>
+      <td>0.000264</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>1.511963</td>
+      <td>0.000264</td>
+      <td>1.512207</td>
+      <td>-0.000111</td>
+      <td>1.512085</td>
+      <td>0.000076</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>1.512085</td>
+      <td>0.000076</td>
+      <td>1.512207</td>
+      <td>-0.000111</td>
+      <td>1.512146</td>
+      <td>-0.000018</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>1.512085</td>
+      <td>0.000076</td>
+      <td>1.512146</td>
+      <td>-0.000018</td>
+      <td>1.512115</td>
+      <td>0.000029</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>1.512115</td>
+      <td>0.000029</td>
+      <td>1.512146</td>
+      <td>-0.000018</td>
+      <td>1.512131</td>
+      <td>0.000006</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>1.512131</td>
+      <td>0.000006</td>
+      <td>1.512146</td>
+      <td>-0.000018</td>
+      <td>1.512138</td>
+      <td>-0.000006</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[69]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The answer is : &quot;</span> <span class="p">,</span> <span class="n">Bisection</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;answer&quot;</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>The answer is :  1.512138366
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="b.-2x-+-3cosx-&#8722;-e&#739;-=-0-for-0-&#8804;-x-&#8804;-1">b. 2x + 3cosx &#8722; e&#739; = 0 for 0 &#8804; x &#8804; 1<a class="anchor-link" href="#b.-2x-+-3cosx-&#8722;-e&#739;-=-0-for-0-&#8804;-x-&#8804;-1">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[70]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">math</span>
+
+<span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[71]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Bisection</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>This problem is unsolvable as
+f(a) =  2.0
+f(b) =  0.9026250891453738
+They are both  positive.
+</pre>
+</div>
+</div>
+
+<div class="output_area"><div class="prompt output_prompt">Out[71]:</div>
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>False</pre>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="c.-x&#178;-&#8722;-4x-+-4-&#8722;-lnx-=-0-for-1-&#8804;-x-&#8804;-2-and-2-&#8804;-x-&#8804;-4">c. x&#178; &#8722; 4x + 4 &#8722; lnx = 0 for 1 &#8804; x &#8804; 2 and 2 &#8804; x &#8804; 4<a class="anchor-link" href="#c.-x&#178;-&#8722;-4x-+-4-&#8722;-lnx-=-0-for-1-&#8804;-x-&#8804;-2-and-2-&#8804;-x-&#8804;-4">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[72]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">math</span>
+
+<span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="mi">4</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">4</span> <span class="o">-</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[73]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Bisection</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">Out[73]:</div>
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>a</th>
+      <th>f(a)</th>
+      <th>b</th>
+      <th>f(b)</th>
+      <th>p</th>
+      <th>f(p)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1</th>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>2.000000</td>
+      <td>-0.693147</td>
+      <td>1.500000</td>
+      <td>-1.554651e-01</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>1.000000</td>
+      <td>1.000000</td>
+      <td>1.500000</td>
+      <td>-0.155465</td>
+      <td>1.250000</td>
+      <td>3.393564e-01</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>1.250000</td>
+      <td>0.339356</td>
+      <td>1.500000</td>
+      <td>-0.155465</td>
+      <td>1.375000</td>
+      <td>7.217127e-02</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>1.375000</td>
+      <td>0.072171</td>
+      <td>1.500000</td>
+      <td>-0.155465</td>
+      <td>1.437500</td>
+      <td>-4.649924e-02</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>1.375000</td>
+      <td>0.072171</td>
+      <td>1.437500</td>
+      <td>-0.046499</td>
+      <td>1.406250</td>
+      <td>1.161248e-02</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>1.406250</td>
+      <td>0.011612</td>
+      <td>1.437500</td>
+      <td>-0.046499</td>
+      <td>1.421875</td>
+      <td>-1.774791e-02</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>1.406250</td>
+      <td>0.011612</td>
+      <td>1.421875</td>
+      <td>-0.017748</td>
+      <td>1.414062</td>
+      <td>-3.144013e-03</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>1.406250</td>
+      <td>0.011612</td>
+      <td>1.414062</td>
+      <td>-0.003144</td>
+      <td>1.410156</td>
+      <td>4.215136e-03</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>1.410156</td>
+      <td>0.004215</td>
+      <td>1.414062</td>
+      <td>-0.003144</td>
+      <td>1.412109</td>
+      <td>5.307898e-04</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>1.412109</td>
+      <td>0.000531</td>
+      <td>1.414062</td>
+      <td>-0.003144</td>
+      <td>1.413086</td>
+      <td>-1.307805e-03</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>1.412109</td>
+      <td>0.000531</td>
+      <td>1.413086</td>
+      <td>-0.001308</td>
+      <td>1.412598</td>
+      <td>-3.888068e-04</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>1.412109</td>
+      <td>0.000531</td>
+      <td>1.412598</td>
+      <td>-0.000389</td>
+      <td>1.412354</td>
+      <td>7.091698e-05</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>1.412354</td>
+      <td>0.000071</td>
+      <td>1.412598</td>
+      <td>-0.000389</td>
+      <td>1.412476</td>
+      <td>-1.589645e-04</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>1.412354</td>
+      <td>0.000071</td>
+      <td>1.412476</td>
+      <td>-0.000159</td>
+      <td>1.412415</td>
+      <td>-4.402746e-05</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>1.412354</td>
+      <td>0.000071</td>
+      <td>1.412415</td>
+      <td>-0.000044</td>
+      <td>1.412384</td>
+      <td>1.344454e-05</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>1.412384</td>
+      <td>0.000013</td>
+      <td>1.412415</td>
+      <td>-0.000044</td>
+      <td>1.412399</td>
+      <td>-1.529176e-05</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>1.412384</td>
+      <td>0.000013</td>
+      <td>1.412399</td>
+      <td>-0.000015</td>
+      <td>1.412392</td>
+      <td>-9.227408e-07</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[74]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The answer is : &quot;</span> <span class="p">,</span> <span class="n">Bisection</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;answer&quot;</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>The answer is :  1.412391662
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[75]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Bisection</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">Out[75]:</div>
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>a</th>
+      <th>f(a)</th>
+      <th>b</th>
+      <th>f(b)</th>
+      <th>p</th>
+      <th>f(p)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1</th>
+      <td>2.000000</td>
+      <td>-0.693147</td>
+      <td>4.000000</td>
+      <td>2.613706</td>
+      <td>3.000000</td>
+      <td>-0.098612</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>3.000000</td>
+      <td>-0.098612</td>
+      <td>4.000000</td>
+      <td>2.613706</td>
+      <td>3.500000</td>
+      <td>0.997237</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>3.000000</td>
+      <td>-0.098612</td>
+      <td>3.500000</td>
+      <td>0.997237</td>
+      <td>3.250000</td>
+      <td>0.383845</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>3.000000</td>
+      <td>-0.098612</td>
+      <td>3.250000</td>
+      <td>0.383845</td>
+      <td>3.125000</td>
+      <td>0.126191</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>3.000000</td>
+      <td>-0.098612</td>
+      <td>3.125000</td>
+      <td>0.126191</td>
+      <td>3.062500</td>
+      <td>0.009675</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>3.000000</td>
+      <td>-0.098612</td>
+      <td>3.062500</td>
+      <td>0.009675</td>
+      <td>3.031250</td>
+      <td>-0.045499</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>3.031250</td>
+      <td>-0.045499</td>
+      <td>3.062500</td>
+      <td>0.009675</td>
+      <td>3.046875</td>
+      <td>-0.018169</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>3.046875</td>
+      <td>-0.018169</td>
+      <td>3.062500</td>
+      <td>0.009675</td>
+      <td>3.054688</td>
+      <td>-0.004312</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>3.054688</td>
+      <td>-0.004312</td>
+      <td>3.062500</td>
+      <td>0.009675</td>
+      <td>3.058594</td>
+      <td>0.002665</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>3.054688</td>
+      <td>-0.004312</td>
+      <td>3.058594</td>
+      <td>0.002665</td>
+      <td>3.056641</td>
+      <td>-0.000827</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>3.056641</td>
+      <td>-0.000827</td>
+      <td>3.058594</td>
+      <td>0.002665</td>
+      <td>3.057617</td>
+      <td>0.000918</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>3.056641</td>
+      <td>-0.000827</td>
+      <td>3.057617</td>
+      <td>0.000918</td>
+      <td>3.057129</td>
+      <td>0.000045</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>3.056641</td>
+      <td>-0.000827</td>
+      <td>3.057129</td>
+      <td>0.000045</td>
+      <td>3.056885</td>
+      <td>-0.000391</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>3.056885</td>
+      <td>-0.000391</td>
+      <td>3.057129</td>
+      <td>0.000045</td>
+      <td>3.057007</td>
+      <td>-0.000173</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>3.057007</td>
+      <td>-0.000173</td>
+      <td>3.057129</td>
+      <td>0.000045</td>
+      <td>3.057068</td>
+      <td>-0.000064</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>3.057068</td>
+      <td>-0.000064</td>
+      <td>3.057129</td>
+      <td>0.000045</td>
+      <td>3.057098</td>
+      <td>-0.000009</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>3.057098</td>
+      <td>-0.000009</td>
+      <td>3.057129</td>
+      <td>0.000045</td>
+      <td>3.057114</td>
+      <td>0.000018</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>3.057098</td>
+      <td>-0.000009</td>
+      <td>3.057114</td>
+      <td>0.000018</td>
+      <td>3.057106</td>
+      <td>0.000004</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[76]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The answer is : &quot;</span> <span class="p">,</span> <span class="n">Bisection</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;answer&quot;</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>The answer is :  3.057106019
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="d.-x-+-1-&#8722;-2sin&#960;x-=-0-for-0-&#8804;-x-&#8804;-0.5-and-0.5-&#8804;-x-&#8804;-1">d. x + 1 &#8722; 2sin&#960;x = 0 for 0 &#8804; x &#8804; 0.5 and 0.5 &#8804; x &#8804; 1<a class="anchor-link" href="#d.-x-+-1-&#8722;-2sin&#960;x-=-0-for-0-&#8804;-x-&#8804;-0.5-and-0.5-&#8804;-x-&#8804;-1">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[77]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">math</span>
+
+<span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[78]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Bisection</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">Out[78]:</div>
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>a</th>
+      <th>f(a)</th>
+      <th>b</th>
+      <th>f(b)</th>
+      <th>p</th>
+      <th>f(p)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1</th>
+      <td>0.000000</td>
+      <td>1.000000</td>
+      <td>0.500000</td>
+      <td>-0.500000</td>
+      <td>0.250000</td>
+      <td>-0.164214</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.000000</td>
+      <td>1.000000</td>
+      <td>0.250000</td>
+      <td>-0.164214</td>
+      <td>0.125000</td>
+      <td>0.359633</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0.125000</td>
+      <td>0.359633</td>
+      <td>0.250000</td>
+      <td>-0.164214</td>
+      <td>0.187500</td>
+      <td>0.076360</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0.187500</td>
+      <td>0.076360</td>
+      <td>0.250000</td>
+      <td>-0.164214</td>
+      <td>0.218750</td>
+      <td>-0.050037</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>0.187500</td>
+      <td>0.076360</td>
+      <td>0.218750</td>
+      <td>-0.050037</td>
+      <td>0.203125</td>
+      <td>0.011726</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>0.203125</td>
+      <td>0.011726</td>
+      <td>0.218750</td>
+      <td>-0.050037</td>
+      <td>0.210938</td>
+      <td>-0.019526</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>0.203125</td>
+      <td>0.011726</td>
+      <td>0.210938</td>
+      <td>-0.019526</td>
+      <td>0.207031</td>
+      <td>-0.003991</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>0.203125</td>
+      <td>0.011726</td>
+      <td>0.207031</td>
+      <td>-0.003991</td>
+      <td>0.205078</td>
+      <td>0.003845</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>0.205078</td>
+      <td>0.003845</td>
+      <td>0.207031</td>
+      <td>-0.003991</td>
+      <td>0.206055</td>
+      <td>-0.000079</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>0.205078</td>
+      <td>0.003845</td>
+      <td>0.206055</td>
+      <td>-0.000079</td>
+      <td>0.205566</td>
+      <td>0.001882</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>0.205566</td>
+      <td>0.001882</td>
+      <td>0.206055</td>
+      <td>-0.000079</td>
+      <td>0.205811</td>
+      <td>0.000901</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>0.205811</td>
+      <td>0.000901</td>
+      <td>0.206055</td>
+      <td>-0.000079</td>
+      <td>0.205933</td>
+      <td>0.000411</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>0.205933</td>
+      <td>0.000411</td>
+      <td>0.206055</td>
+      <td>-0.000079</td>
+      <td>0.205994</td>
+      <td>0.000166</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>0.205994</td>
+      <td>0.000166</td>
+      <td>0.206055</td>
+      <td>-0.000079</td>
+      <td>0.206024</td>
+      <td>0.000044</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>0.206024</td>
+      <td>0.000044</td>
+      <td>0.206055</td>
+      <td>-0.000079</td>
+      <td>0.206039</td>
+      <td>-0.000017</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>0.206024</td>
+      <td>0.000044</td>
+      <td>0.206039</td>
+      <td>-0.000017</td>
+      <td>0.206032</td>
+      <td>0.000013</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[79]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The answer is : &quot;</span> <span class="p">,</span> <span class="n">Bisection</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;answer&quot;</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>The answer is :  0.2060318
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[80]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">Bisection</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt output_prompt">Out[80]:</div>
+
+<div class="output_html rendered_html output_subarea output_execute_result">
+<div>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>a</th>
+      <th>f(a)</th>
+      <th>b</th>
+      <th>f(b)</th>
+      <th>p</th>
+      <th>f(p)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>1</th>
+      <td>0.500000</td>
+      <td>-0.500000</td>
+      <td>1.000000</td>
+      <td>2.000000</td>
+      <td>0.750000</td>
+      <td>0.335786</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.500000</td>
+      <td>-0.500000</td>
+      <td>0.750000</td>
+      <td>0.335786</td>
+      <td>0.625000</td>
+      <td>-0.222759</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>0.625000</td>
+      <td>-0.222759</td>
+      <td>0.750000</td>
+      <td>0.335786</td>
+      <td>0.687500</td>
+      <td>0.024561</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0.625000</td>
+      <td>-0.222759</td>
+      <td>0.687500</td>
+      <td>0.024561</td>
+      <td>0.656250</td>
+      <td>-0.107593</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>0.656250</td>
+      <td>-0.107593</td>
+      <td>0.687500</td>
+      <td>0.024561</td>
+      <td>0.671875</td>
+      <td>-0.043582</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>0.671875</td>
+      <td>-0.043582</td>
+      <td>0.687500</td>
+      <td>0.024561</td>
+      <td>0.679688</td>
+      <td>-0.010020</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>0.679688</td>
+      <td>-0.010020</td>
+      <td>0.687500</td>
+      <td>0.024561</td>
+      <td>0.683594</td>
+      <td>0.007144</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>0.679688</td>
+      <td>-0.010020</td>
+      <td>0.683594</td>
+      <td>0.007144</td>
+      <td>0.681641</td>
+      <td>-0.001469</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>0.681641</td>
+      <td>-0.001469</td>
+      <td>0.683594</td>
+      <td>0.007144</td>
+      <td>0.682617</td>
+      <td>0.002830</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>0.681641</td>
+      <td>-0.001469</td>
+      <td>0.682617</td>
+      <td>0.002830</td>
+      <td>0.682129</td>
+      <td>0.000678</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>0.681641</td>
+      <td>-0.001469</td>
+      <td>0.682129</td>
+      <td>0.000678</td>
+      <td>0.681885</td>
+      <td>-0.000396</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>0.681885</td>
+      <td>-0.000396</td>
+      <td>0.682129</td>
+      <td>0.000678</td>
+      <td>0.682007</td>
+      <td>0.000141</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>0.681885</td>
+      <td>-0.000396</td>
+      <td>0.682007</td>
+      <td>0.000141</td>
+      <td>0.681946</td>
+      <td>-0.000128</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>0.681946</td>
+      <td>-0.000128</td>
+      <td>0.682007</td>
+      <td>0.000141</td>
+      <td>0.681976</td>
+      <td>0.000007</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>0.681946</td>
+      <td>-0.000128</td>
+      <td>0.681976</td>
+      <td>0.000007</td>
+      <td>0.681961</td>
+      <td>-0.000060</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>0.681961</td>
+      <td>-0.000060</td>
+      <td>0.681976</td>
+      <td>0.000007</td>
+      <td>0.681969</td>
+      <td>-0.000027</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[81]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The answer is : &quot;</span> <span class="p">,</span> <span class="n">Bisection</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">5</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;answer&quot;</span><span class="p">))</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>The answer is :  0.68196869
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span> 
+</pre></div>
+
+</div>
+</div>
+</div>
+
 </div>
     </div>
   </div>
