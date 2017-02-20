@@ -11751,6 +11751,15 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="Numerical-Computing"><a href="https://aadimator.github.io/numerical-computing">Numerical Computing</a><a class="anchor-link" href="#Numerical-Computing">&#182;</a></h1><h4 id="Notes-by-Aadam---@aadimator">Notes by Aadam - <a href="https://github.com/aadimator">@aadimator</a><a class="anchor-link" href="#Notes-by-Aadam---@aadimator">&#182;</a></h4>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <h1 id="The-Bisection-Method">The Bisection Method<a class="anchor-link" href="#The-Bisection-Method">&#182;</a></h1>
 </div>
 </div>
@@ -11807,7 +11816,7 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[22]:</div>
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -11820,7 +11829,7 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[23]:</div>
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">Bisection</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">0.000001</span><span class="p">,</span> <span class="n">max_iterations</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s1">&#39;answer&#39;</span><span class="p">,</span> <span class="n">stopping_criterion</span><span class="o">=</span><span class="s1">&#39;tolerance&#39;</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="mi">100</span><span class="p">):</span>
@@ -11865,23 +11874,25 @@ div#notebook {
         <span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;They are both &quot;</span><span class="p">,</span> <span class="s2">&quot;negative.&quot;</span> <span class="k">if</span> <span class="n">fa</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="s2">&quot;positive.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">False</span>
     
-    <span class="n">A</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-    <span class="n">B</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-    <span class="n">P</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-    <span class="n">FA</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-    <span class="n">FB</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-    <span class="n">FP</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">output</span> <span class="o">==</span> <span class="s2">&quot;table&quot;</span><span class="p">):</span>
+        <span class="n">A</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">B</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">P</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">FA</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">FB</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">FP</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
     
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_iterations</span><span class="p">):</span>
         <span class="n">p</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="p">(</span><span class="n">b</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span>
         <span class="n">fp</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
         
-        <span class="n">A</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
-        <span class="n">B</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
-        <span class="n">P</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
-        <span class="n">FA</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fa</span><span class="p">)</span>
-        <span class="n">FB</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fb</span><span class="p">)</span>
-        <span class="n">FP</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">output</span> <span class="o">==</span> <span class="s2">&quot;table&quot;</span><span class="p">):</span>
+            <span class="n">A</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+            <span class="n">B</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+            <span class="n">P</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+            <span class="n">FA</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fa</span><span class="p">)</span>
+            <span class="n">FB</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fb</span><span class="p">)</span>
+            <span class="n">FP</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
         
         <span class="k">if</span> <span class="p">(</span><span class="n">fp</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">(</span><span class="n">b</span><span class="o">-</span><span class="n">a</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span> <span class="o">&lt;</span> <span class="n">tolerance</span> <span class="ow">or</span> <span class="p">(</span><span class="n">stopping_criterion</span> <span class="o">==</span> <span class="s1">&#39;iteration&#39;</span> <span class="ow">and</span> <span class="n">iteration</span> <span class="o">==</span> <span class="n">i</span><span class="p">)):</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">output</span> <span class="o">==</span> <span class="s1">&#39;answer&#39;</span><span class="p">):</span>
@@ -11921,7 +11932,7 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[24]:</div>
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
@@ -11935,7 +11946,7 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[25]:</div>
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">Bisection</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">)</span>
@@ -11949,7 +11960,7 @@ div#notebook {
 <div class="output">
 
 
-<div class="output_area"><div class="prompt output_prompt">Out[25]:</div>
+<div class="output_area"><div class="prompt output_prompt">Out[5]:</div>
 
 <div class="output_html rendered_html output_subarea output_execute_result">
 <div>
@@ -12105,7 +12116,7 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[26]:</div>
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The answer is : &quot;</span> <span class="p">,</span> <span class="n">Bisection</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;answer&quot;</span><span class="p">))</span>
