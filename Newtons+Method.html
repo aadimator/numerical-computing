@@ -11803,13 +11803,27 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[65]:</div>
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">sympy</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">plotly.offline</span> <span class="k">import</span> <span class="n">download_plotlyjs</span><span class="p">,</span> <span class="n">init_notebook_mode</span><span class="p">,</span> <span class="n">iplot</span>
+<span class="kn">from</span> <span class="nn">plotly.graph_objs</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="k">def</span> <span class="nf">NewtonsMethod</span><span class="p">(</span><span class="n">p0</span><span class="p">,</span> <span class="n">equation</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">0.000001</span><span class="p">,</span> <span class="n">max_iterations</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s1">&#39;answer&#39;</span><span class="p">,</span> <span class="n">stopping_criterion</span><span class="o">=</span><span class="s1">&#39;tolerance&#39;</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="mi">50</span><span class="p">):</span>
+<span class="n">init_notebook_mode</span><span class="p">(</span><span class="n">connected</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">NewtonsMethod</span><span class="p">(</span>
+    <span class="n">p0</span><span class="p">,</span> 
+    <span class="n">equation</span><span class="p">,</span> 
+    <span class="n">tolerance</span><span class="o">=</span><span class="mf">0.000001</span><span class="p">,</span> 
+    <span class="n">max_iterations</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> 
+    <span class="n">output</span><span class="o">=</span><span class="s1">&#39;answer&#39;</span><span class="p">,</span> 
+    <span class="n">plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">stopping_criterion</span><span class="o">=</span><span class="s1">&#39;tolerance&#39;</span><span class="p">,</span> 
+    <span class="n">iteration</span><span class="o">=</span><span class="mi">50</span> 
+<span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    The Newton&#39;s Method</span>
 <span class="sd">    </span>
@@ -11822,6 +11836,7 @@ div#notebook {
 <span class="sd">                possible values are:</span>
 <span class="sd">                  - &#39;answer&#39; : to show the value of &quot;p&quot;</span>
 <span class="sd">                  - &#39;table&#39; : to show all the values in tabular form</span>
+<span class="sd">    plot (bool) -- whether to show plot or not (default=False)</span>
 <span class="sd">    stopping_criterion (string) -- when to stop the processing (default = &#39;tolerance&#39;)</span>
 <span class="sd">                possible vaulse are:</span>
 <span class="sd">                  - &#39;tolerance&#39; : to stop at a certain tolerance level</span>
@@ -11837,17 +11852,63 @@ div#notebook {
     <span class="n">f</span> <span class="o">=</span> <span class="n">lambdify</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">equation</span><span class="p">)</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">lambdify</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">equation</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
     
-    <span class="k">if</span> <span class="p">(</span><span class="n">output</span> <span class="o">==</span> <span class="s2">&quot;table&quot;</span><span class="p">):</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+    <span class="n">Y</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">X</span><span class="p">))</span>
+    
+    <span class="k">if</span> <span class="p">(</span><span class="n">output</span> <span class="o">==</span> <span class="s2">&quot;table&quot;</span> <span class="ow">or</span> <span class="n">plot</span><span class="p">):</span>
             <span class="n">P</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="n">FP</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
             <span class="n">P</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p0</span><span class="p">)</span>
+            <span class="n">FP</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">p0</span><span class="p">))</span>
+            <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;P0&#39;</span><span class="p">)</span>
             
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_iterations</span><span class="p">):</span>
         <span class="n">p</span> <span class="o">=</span> <span class="n">p0</span> <span class="o">-</span> <span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">p0</span><span class="p">)</span><span class="o">/</span><span class="n">df</span><span class="p">(</span><span class="n">p0</span><span class="p">))</span>
         
-        <span class="k">if</span> <span class="p">(</span><span class="n">output</span> <span class="o">==</span> <span class="s2">&quot;table&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">output</span> <span class="o">==</span> <span class="s2">&quot;table&quot;</span> <span class="ow">or</span> <span class="n">plot</span><span class="p">):</span>
             <span class="n">P</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+            <span class="n">FP</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
+            <span class="n">labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;P&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
         
         <span class="k">if</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">p</span> <span class="o">-</span> <span class="n">p0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">tolerance</span> <span class="ow">or</span> <span class="p">(</span><span class="n">stopping_criterion</span> <span class="o">==</span> <span class="s1">&#39;iteration&#39;</span> <span class="ow">and</span> <span class="n">iteration</span> <span class="o">==</span> <span class="n">i</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">plot</span><span class="p">):</span>
+                <span class="n">trace0</span> <span class="o">=</span> <span class="n">Scatter</span><span class="p">(</span>
+                <span class="n">x</span><span class="o">=</span><span class="n">X</span><span class="p">,</span>
+                <span class="n">y</span><span class="o">=</span><span class="n">Y</span><span class="p">,</span>
+                <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;lines&#39;</span><span class="p">,</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;equation&quot;</span>
+                <span class="p">)</span>
+
+                <span class="n">trace1</span> <span class="o">=</span> <span class="n">Scatter</span><span class="p">(</span>
+                    <span class="n">x</span><span class="o">=</span><span class="n">P</span><span class="p">,</span>
+                    <span class="n">y</span><span class="o">=</span><span class="n">FP</span><span class="p">,</span>
+                    <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;markers&#39;</span><span class="p">,</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;(p, f(p))&quot;</span><span class="p">,</span>
+                    <span class="n">text</span> <span class="o">=</span> <span class="n">labels</span>
+                <span class="p">)</span>
+
+                <span class="n">trace2</span> <span class="o">=</span> <span class="n">Scatter</span><span class="p">(</span>
+                    <span class="n">x</span><span class="o">=</span><span class="n">P</span><span class="p">,</span>
+                    <span class="n">y</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">P</span><span class="p">),),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">),</span>
+                    <span class="n">mode</span> <span class="o">=</span> <span class="s1">&#39;markers&#39;</span><span class="p">,</span>
+                    <span class="n">text</span> <span class="o">=</span> <span class="n">labels</span><span class="p">,</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;p&quot;</span>
+                <span class="p">)</span>
+                <span class="n">layout</span> <span class="o">=</span> <span class="n">Layout</span><span class="p">(</span>
+                    <span class="n">xaxis</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                        <span class="nb">range</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+                    <span class="p">),</span>
+                    <span class="n">yaxis</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                       <span class="nb">range</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">]</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">Data</span><span class="p">([</span><span class="n">trace0</span><span class="p">,</span> <span class="n">trace1</span><span class="p">,</span> <span class="n">trace2</span><span class="p">])</span>
+                <span class="n">fig</span> <span class="o">=</span> <span class="n">Figure</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">layout</span><span class="o">=</span><span class="n">layout</span><span class="p">)</span>
+
+                <span class="n">iplot</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+            
             <span class="k">if</span> <span class="p">(</span><span class="n">output</span> <span class="o">==</span> <span class="s1">&#39;answer&#39;</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">p</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">output</span> <span class="o">==</span> <span class="s1">&#39;table&#39;</span><span class="p">):</span>
@@ -11864,6 +11925,21 @@ div#notebook {
 </div>
 </div>
 
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area"><div class="prompt"></div>
+
+<div class="output_html rendered_html output_subarea ">
+<script>requirejs.config({paths: { 'plotly': ['https://cdn.plot.ly/plotly-latest.min']},});if(!window.Plotly) {{require(['plotly'],function(plotly) {window.Plotly=plotly;});}}</script>
+</div>
+
+</div>
+
+</div>
+</div>
+
 </div>
 <div class="cell border-box-sizing text_cell rendered">
 <div class="prompt input_prompt">
@@ -11876,14 +11952,14 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[43]:</div>
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">from</span> <span class="nn">sympy</span> <span class="k">import</span> <span class="o">*</span>
 
 <span class="n">x</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
-<span class="n">NewtonsMethod</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span> <span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">x</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">)</span>
+<span class="n">NewtonsMethod</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span> <span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">x</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -11894,7 +11970,15 @@ div#notebook {
 <div class="output">
 
 
-<div class="output_area"><div class="prompt output_prompt">Out[43]:</div>
+<div class="output_area"><div class="prompt"></div>
+
+<div class="output_html rendered_html output_subarea ">
+<div id="39dbdbab-6d2b-4c86-96cf-09a371db17c6" style="height: 525px; width: 100%;" class="plotly-graph-div"></div><script type="text/javascript">require(["plotly"], function(Plotly) { window.PLOTLYENV=window.PLOTLYENV || {};window.PLOTLYENV.BASE_URL="https://plot.ly";Plotly.newPlot("39dbdbab-6d2b-4c86-96cf-09a371db17c6", [{"name": "equation", "type": "scatter", "mode": "lines", "y": [5.283662185463227, 5.084509797055185, 4.883466150481822, 4.681551024547599, 4.479793082238532, 4.279219384152878, 4.080844918267138, 3.8856622527748197, 3.694631417480722, 3.508670116903545, 3.3286443748580403, 3.155359705889306, 2.9895529035608464, 2.8318845293096415, 2.6829321784395788, 2.543184591902208, 2.4130366738914795, 2.292785466044957, 2.1826271192919693, 2.0826548942187926, 1.9928582103358903, 1.9131227539393199, 1.8432316434667295, 1.782867640467881, 1.7316163836502445, 1.6889706130306201, 1.6543353411302213, 1.627033918496161, 1.6063149317151746, 1.5913598635986899, 1.581291437448496, 1.575182560338495, 1.5720657742414248, 1.570943118652291, 1.570796304165291, 1.5705970932910376, 1.569317782688212, 1.565941679949915, 1.559473468140496, 1.548949352422957, 1.5334468853384728, 1.5120943705755132, 1.4840797493630729, 1.4486588788968568, 1.4051631184050832, 1.3530061455187625, 1.2916899334578607, 1.2208098280997124, 1.140058673172176, 1.049229941517793, 0.9482198405076927, 0.8370283701418734, 0.7157593230492072, 0.5846192263871529, 0.4439152364278538, 0.2940520072939725, 0.1355275657655437, -0.03107176578844273, -0.20507734659620336, -0.3857450338534457, -0.5722627687891642, -0.7637588550918275, -0.9593108453026091, -1.1579549445845145, -1.3586958360018915, -1.5605168271478405, -1.7623902146810428, -1.9632877611121098, -2.162191177035242, -2.358102501945443, -2.550054277815452, -2.737119411719168, -2.918420626958384, -3.093139406344526, -3.2605243364643295, -3.419898767864906, -3.5706677130674724, -3.712323912088826, -3.844453003636438, -3.9667377492600684, -4.07896126739737, -4.181009244344394, -4.272871099611608, -4.354640093785289, -4.4265123777947615, -4.4887849932775925, -4.541852844427733, -4.586204672196729, -4.622418071888472, -4.651153604939939, -4.673148064914637, -4.689206966357662, -4.700196333083767, -4.707033869611649, -4.710679605746112, -4.71212610968066, -4.712388369391795, -4.712493445477773, -4.713470000924612, -4.716337814536773], "x": [-5.0, -4.898989898989899, -4.797979797979798, -4.696969696969697, -4.595959595959596, -4.494949494949495, -4.393939393939394, -4.292929292929293, -4.191919191919192, -4.090909090909091, -3.9898989898989896, -3.888888888888889, -3.787878787878788, -3.686868686868687, -3.5858585858585856, -3.484848484848485, -3.383838383838384, -3.282828282828283, -3.1818181818181817, -3.080808080808081, -2.9797979797979797, -2.878787878787879, -2.7777777777777777, -2.676767676767677, -2.5757575757575757, -2.474747474747475, -2.3737373737373737, -2.272727272727273, -2.1717171717171717, -2.070707070707071, -1.9696969696969697, -1.868686868686869, -1.7676767676767677, -1.6666666666666665, -1.5656565656565657, -1.4646464646464645, -1.3636363636363638, -1.2626262626262625, -1.1616161616161618, -1.0606060606060606, -0.9595959595959593, -0.858585858585859, -0.7575757575757578, -0.6565656565656566, -0.5555555555555554, -0.45454545454545503, -0.3535353535353538, -0.2525252525252526, -0.15151515151515138, -0.050505050505050164, 0.050505050505050164, 0.15151515151515138, 0.2525252525252526, 0.3535353535353538, 0.45454545454545414, 0.5555555555555554, 0.6565656565656566, 0.7575757575757578, 0.8585858585858581, 0.9595959595959593, 1.0606060606060606, 1.1616161616161618, 1.262626262626262, 1.3636363636363633, 1.4646464646464645, 1.5656565656565657, 1.666666666666667, 1.7676767676767673, 1.8686868686868685, 1.9696969696969697, 2.070707070707071, 2.1717171717171713, 2.2727272727272725, 2.3737373737373737, 2.474747474747475, 2.5757575757575752, 2.6767676767676765, 2.7777777777777777, 2.878787878787879, 2.9797979797979792, 3.0808080808080813, 3.1818181818181817, 3.282828282828282, 3.383838383838384, 3.4848484848484844, 3.5858585858585865, 3.686868686868687, 3.787878787878787, 3.8888888888888893, 3.9898989898989896, 4.09090909090909, 4.191919191919192, 4.292929292929292, 4.3939393939393945, 4.494949494949495, 4.595959595959595, 4.696969696969697, 4.797979797979798, 4.8989898989899, 5.0]}, {"text": ["P0", "P1", "P2", "P3"], "name": "(p, f(p))", "y": [-0.0782913822109007, -0.000754874682502682, -7.512986655022758e-08, -6.661338147750939e-16], "x": [0.7853981633974483, 0.7395361335152383, 0.7390851781060102, 0.739085133215161], "type": "scatter", "mode": "markers"}, {"text": ["P0", "P1", "P2", "P3"], "name": "p", "y": [0, 0, 0, 0], "x": [0.7853981633974483, 0.7395361335152383, 0.7390851781060102, 0.739085133215161], "type": "scatter", "mode": "markers"}], {"xaxis": {"range": [-5, 5]}, "yaxis": {"range": [-20, 20]}}, {"linkText": "Export to plot.ly", "showLink": true})});</script>
+</div>
+
+</div>
+
+<div class="output_area"><div class="prompt output_prompt">Out[3]:</div>
 
 <div class="output_html rendered_html output_subarea output_execute_result">
 
@@ -11903,7 +11987,7 @@ div#notebook {
         
         </style>
 
-        <table id="T_3f9575a4_f781_11e6_8ea4_e0ca948f7d8b" None>
+        <table id="T_921a0b66_f7ec_11e6_bf3a_e0ca948f7d8b" None>
         
 
         <thead>
@@ -11921,40 +12005,40 @@ div#notebook {
             
             <tr>
                 
-                <th id="T_3f9575a4_f781_11e6_8ea4_e0ca948f7d8b" class="row_heading level0 row0">
+                <th id="T_921a0b66_f7ec_11e6_bf3a_e0ca948f7d8b" class="row_heading level0 row0">
                     0
                 
-                <td id="T_3f9575a4_f781_11e6_8ea4_e0ca948f7d8brow0_col0" class="data row0 col0">
+                <td id="T_921a0b66_f7ec_11e6_bf3a_e0ca948f7d8brow0_col0" class="data row0 col0">
                     0.7853981634
                 
             </tr>
             
             <tr>
                 
-                <th id="T_3f9575a4_f781_11e6_8ea4_e0ca948f7d8b" class="row_heading level0 row1">
+                <th id="T_921a0b66_f7ec_11e6_bf3a_e0ca948f7d8b" class="row_heading level0 row1">
                     1
                 
-                <td id="T_3f9575a4_f781_11e6_8ea4_e0ca948f7d8brow1_col0" class="data row1 col0">
+                <td id="T_921a0b66_f7ec_11e6_bf3a_e0ca948f7d8brow1_col0" class="data row1 col0">
                     0.7395361335
                 
             </tr>
             
             <tr>
                 
-                <th id="T_3f9575a4_f781_11e6_8ea4_e0ca948f7d8b" class="row_heading level0 row2">
+                <th id="T_921a0b66_f7ec_11e6_bf3a_e0ca948f7d8b" class="row_heading level0 row2">
                     2
                 
-                <td id="T_3f9575a4_f781_11e6_8ea4_e0ca948f7d8brow2_col0" class="data row2 col0">
+                <td id="T_921a0b66_f7ec_11e6_bf3a_e0ca948f7d8brow2_col0" class="data row2 col0">
                     0.7390851781
                 
             </tr>
             
             <tr>
                 
-                <th id="T_3f9575a4_f781_11e6_8ea4_e0ca948f7d8b" class="row_heading level0 row3">
+                <th id="T_921a0b66_f7ec_11e6_bf3a_e0ca948f7d8b" class="row_heading level0 row3">
                     3
                 
-                <td id="T_3f9575a4_f781_11e6_8ea4_e0ca948f7d8brow3_col0" class="data row3 col0">
+                <td id="T_921a0b66_f7ec_11e6_bf3a_e0ca948f7d8brow3_col0" class="data row3 col0">
                     0.7390851332
                 
             </tr>
@@ -11990,13 +12074,11 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[45]:</div>
+<div class="prompt input_prompt">In&nbsp;[4]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">sympy</span> <span class="k">import</span> <span class="o">*</span>
-
-<span class="n">x</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
-<span class="n">NewtonsMethod</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="mi">6</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">,</span> <span class="n">stopping_criterion</span><span class="o">=</span><span class="s2">&quot;iteration&quot;</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">NewtonsMethod</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="mi">6</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">,</span> <span class="n">stopping_criterion</span><span class="o">=</span><span class="s2">&quot;iteration&quot;</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12007,7 +12089,15 @@ div#notebook {
 <div class="output">
 
 
-<div class="output_area"><div class="prompt output_prompt">Out[45]:</div>
+<div class="output_area"><div class="prompt"></div>
+
+<div class="output_html rendered_html output_subarea ">
+<div id="23b6761b-c061-41e3-a1e5-bbb8d16db966" style="height: 525px; width: 100%;" class="plotly-graph-div"></div><script type="text/javascript">require(["plotly"], function(Plotly) { window.PLOTLYENV=window.PLOTLYENV || {};window.PLOTLYENV.BASE_URL="https://plot.ly";Plotly.newPlot("23b6761b-c061-41e3-a1e5-bbb8d16db966", [{"name": "equation", "type": "scatter", "mode": "lines", "y": [19.0, 18.00010203040506, 17.02061014182226, 16.061524334251608, 15.122844607693093, 14.204570962146718, 13.306703397612484, 12.429241914090401, 11.572186511580451, 10.735537190082646, 9.919293949596977, 9.123456790123456, 8.348025711662077, 7.593000714212835, 6.858381797775735, 6.144168962350781, 5.450362207937967, 4.776961534537293, 4.12396694214876, 3.49137843077237, 2.87919600040812, 2.287419651056016, 1.716049382716049, 1.1650851953882269, 0.6345270890725434, 0.12437506376900398, -0.36537088052239586, -0.8347107438016517, -1.2836445260687688, -1.7121722273237419, -2.120293847566575, -2.508009386797265, -2.8753188450158147, -3.2222222222222228, -3.5487195184164877, -3.8548107335986126, -4.140495867768594, -4.4057749209264365, -4.650647893072135, -4.875114784205693, -5.0791755943271095, -5.262830323436384, -5.426078971533517, -5.5689215386185085, -5.691358024691358, -5.793388429752065, -5.8750127538006325, -5.9362309968370575, -5.977043158861341, -5.997449239873482, -5.997449239873482, -5.977043158861341, -5.9362309968370575, -5.8750127538006325, -5.793388429752066, -5.691358024691358, -5.5689215386185085, -5.426078971533517, -5.2628303234363845, -5.0791755943271095, -4.875114784205693, -4.650647893072135, -4.405774920926437, -4.140495867768596, -3.8548107335986126, -3.5487195184164877, -3.2222222222222214, -2.875318845015816, -2.508009386797266, -2.120293847566575, -1.7121722273237419, -1.2836445260687706, -0.8347107438016543, -0.36537088052239586, 0.12437506376900398, 0.6345270890725407, 1.1650851953882242, 1.716049382716049, 2.287419651056016, 2.8791960004081183, 3.4913784307723734, 4.12396694214876, 4.776961534537287, 5.450362207937967, 6.144168962350777, 6.858381797775742, 7.593000714212835, 8.34802571166207, 9.12345679012346, 9.919293949596977, 10.735537190082638, 11.572186511580451, 12.429241914090394, 13.306703397612495, 14.204570962146718, 15.122844607693086, 16.061524334251608, 17.02061014182226, 18.000102030405067, 19.0], "x": [-5.0, -4.898989898989899, -4.797979797979798, -4.696969696969697, -4.595959595959596, -4.494949494949495, -4.393939393939394, -4.292929292929293, -4.191919191919192, -4.090909090909091, -3.9898989898989896, -3.888888888888889, -3.787878787878788, -3.686868686868687, -3.5858585858585856, -3.484848484848485, -3.383838383838384, -3.282828282828283, -3.1818181818181817, -3.080808080808081, -2.9797979797979797, -2.878787878787879, -2.7777777777777777, -2.676767676767677, -2.5757575757575757, -2.474747474747475, -2.3737373737373737, -2.272727272727273, -2.1717171717171717, -2.070707070707071, -1.9696969696969697, -1.868686868686869, -1.7676767676767677, -1.6666666666666665, -1.5656565656565657, -1.4646464646464645, -1.3636363636363638, -1.2626262626262625, -1.1616161616161618, -1.0606060606060606, -0.9595959595959593, -0.858585858585859, -0.7575757575757578, -0.6565656565656566, -0.5555555555555554, -0.45454545454545503, -0.3535353535353538, -0.2525252525252526, -0.15151515151515138, -0.050505050505050164, 0.050505050505050164, 0.15151515151515138, 0.2525252525252526, 0.3535353535353538, 0.45454545454545414, 0.5555555555555554, 0.6565656565656566, 0.7575757575757578, 0.8585858585858581, 0.9595959595959593, 1.0606060606060606, 1.1616161616161618, 1.262626262626262, 1.3636363636363633, 1.4646464646464645, 1.5656565656565657, 1.666666666666667, 1.7676767676767673, 1.8686868686868685, 1.9696969696969697, 2.070707070707071, 2.1717171717171713, 2.2727272727272725, 2.3737373737373737, 2.474747474747475, 2.5757575757575752, 2.6767676767676765, 2.7777777777777777, 2.878787878787879, 2.9797979797979792, 3.0808080808080813, 3.1818181818181817, 3.282828282828282, 3.383838383838384, 3.4848484848484844, 3.5858585858585865, 3.686868686868687, 3.787878787878787, 3.8888888888888893, 3.9898989898989896, 4.09090909090909, 4.191919191919192, 4.292929292929292, 4.3939393939393945, 4.494949494949495, 4.595959595959595, 4.696969696969697, 4.797979797979798, 4.8989898989899, 5.0]}, {"text": ["P0", "P1", "P2"], "name": "(p, f(p))", "y": [-5, 6.25, 0.7971938775510203], "x": [1, 3.5, 2.607142857142857], "type": "scatter", "mode": "markers"}, {"text": ["P0", "P1", "P2"], "name": "p", "y": [0, 0, 0], "x": [1, 3.5, 2.607142857142857], "type": "scatter", "mode": "markers"}], {"xaxis": {"range": [-5, 5]}, "yaxis": {"range": [-20, 20]}}, {"linkText": "Export to plot.ly", "showLink": true})});</script>
+</div>
+
+</div>
+
+<div class="output_area"><div class="prompt output_prompt">Out[4]:</div>
 
 <div class="output_html rendered_html output_subarea output_execute_result">
 
@@ -12016,7 +12106,7 @@ div#notebook {
         
         </style>
 
-        <table id="T_d7330aa2_f781_11e6_8197_e0ca948f7d8b" None>
+        <table id="T_9ca570ba_f7ec_11e6_84d4_e0ca948f7d8b" None>
         
 
         <thead>
@@ -12034,30 +12124,30 @@ div#notebook {
             
             <tr>
                 
-                <th id="T_d7330aa2_f781_11e6_8197_e0ca948f7d8b" class="row_heading level0 row0">
+                <th id="T_9ca570ba_f7ec_11e6_84d4_e0ca948f7d8b" class="row_heading level0 row0">
                     0
                 
-                <td id="T_d7330aa2_f781_11e6_8197_e0ca948f7d8brow0_col0" class="data row0 col0">
+                <td id="T_9ca570ba_f7ec_11e6_84d4_e0ca948f7d8brow0_col0" class="data row0 col0">
                     1.0
                 
             </tr>
             
             <tr>
                 
-                <th id="T_d7330aa2_f781_11e6_8197_e0ca948f7d8b" class="row_heading level0 row1">
+                <th id="T_9ca570ba_f7ec_11e6_84d4_e0ca948f7d8b" class="row_heading level0 row1">
                     1
                 
-                <td id="T_d7330aa2_f781_11e6_8197_e0ca948f7d8brow1_col0" class="data row1 col0">
+                <td id="T_9ca570ba_f7ec_11e6_84d4_e0ca948f7d8brow1_col0" class="data row1 col0">
                     3.5
                 
             </tr>
             
             <tr>
                 
-                <th id="T_d7330aa2_f781_11e6_8197_e0ca948f7d8b" class="row_heading level0 row2">
+                <th id="T_9ca570ba_f7ec_11e6_84d4_e0ca948f7d8b" class="row_heading level0 row2">
                     2
                 
-                <td id="T_d7330aa2_f781_11e6_8197_e0ca948f7d8brow2_col0" class="data row2 col0">
+                <td id="T_9ca570ba_f7ec_11e6_84d4_e0ca948f7d8brow2_col0" class="data row2 col0">
                     2.607142857
                 
             </tr>
@@ -12084,13 +12174,13 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[46]:</div>
+<div class="prompt input_prompt">In&nbsp;[5]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">sympy</span> <span class="k">import</span> <span class="o">*</span>
 
 <span class="n">x</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
-<span class="n">NewtonsMethod</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-</span> <span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">,</span> <span class="n">stopping_criterion</span><span class="o">=</span><span class="s2">&quot;iteration&quot;</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">NewtonsMethod</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-</span> <span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">,</span> <span class="n">stopping_criterion</span><span class="o">=</span><span class="s2">&quot;iteration&quot;</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12101,7 +12191,15 @@ div#notebook {
 <div class="output">
 
 
-<div class="output_area"><div class="prompt output_prompt">Out[46]:</div>
+<div class="output_area"><div class="prompt"></div>
+
+<div class="output_html rendered_html output_subarea ">
+<div id="db8020a3-c553-4a92-910c-5e470d5432e1" style="height: 525px; width: 100%;" class="plotly-graph-div"></div><script type="text/javascript">require(["plotly"], function(Plotly) { window.PLOTLYENV=window.PLOTLYENV || {};window.PLOTLYENV.BASE_URL="https://plot.ly";Plotly.newPlot("db8020a3-c553-4a92-910c-5e470d5432e1", [{"name": "equation", "type": "scatter", "mode": "lines", "y": [-125.28366218546323, -117.76177731974663, -110.53790875013408, -103.60689259451728, -96.96357385496941, -90.602795931176, -84.51939015020078, -78.70816541932453, -73.16389810743918, -67.88132225815072, -62.855120234361124, -58.079913889702745, -53.550256356826296, -49.26062453625595, -45.205412362382866, -41.37892491524584, -37.77537343812602, -34.38887131174819, -31.213431026128934, -28.242962180941753, -25.47127053478433, -22.89205811303997, -20.498924373233532, -18.285368416002022, -16.24479221914013, -14.370504861751893, -12.655727695445746, -11.093600409856045, -9.677187930656737, -8.399488079746499, -7.253439919514334, -6.231932696121385, -5.327815290627611, -4.533906081615252, -3.8430031187657394, -3.2478945036769074, -2.741368872094674, -2.3162258706993644, -1.9652865216425612, -1.6814033691744943, -1.4574703049235693, -1.286431971665487, -1.1612926497164693, -1.0751245353594525, -1.0210753269098842, -0.9923750410860052, -0.9823419901950105, -0.9843878592014655, -0.9920218309204579, -0.9988537172817589, -0.9985960647437269, -0.9850652123935916, -0.952181291947454, -0.893967169650003, -0.8045463408606109, -0.6781397987891714, -0.5090619093029481, -0.2917153338581609, -0.020585052313823904, 0.3097684534385422, 0.7047167855407015, 1.1695719085938927, 1.7095950360520566, 2.3300060339909745, 3.0359932463877617, 3.8327236417482893, 4.725353177644008, 5.719037277498292, 6.8189413128181275, 8.030250984011282, 9.35818249396326, 10.807992410660725, 12.38498711831826, 14.094531760660052, 15.942058585185602, 17.93307460335478, 20.073168488601606, 22.36801664185563, 24.823388362737088, 27.445150073708497, 30.239268554120343, 33.21181315118136, 36.36895694531481, 39.71697685801983, 43.26225270113838, 47.01126517722092, 50.97059285137404, 55.14690812546213, 59.54697225570193, 64.17762946444303, 69.04580020616177, 74.15847365631613, 79.52269949963343, 85.14557910154535, 91.03425615276923, 97.19590688241149, 103.63772993936148, 110.36693604513002, 117.39073752361612, 124.71633781453677], "x": [-5.0, -4.898989898989899, -4.797979797979798, -4.696969696969697, -4.595959595959596, -4.494949494949495, -4.393939393939394, -4.292929292929293, -4.191919191919192, -4.090909090909091, -3.9898989898989896, -3.888888888888889, -3.787878787878788, -3.686868686868687, -3.5858585858585856, -3.484848484848485, -3.383838383838384, -3.282828282828283, -3.1818181818181817, -3.080808080808081, -2.9797979797979797, -2.878787878787879, -2.7777777777777777, -2.676767676767677, -2.5757575757575757, -2.474747474747475, -2.3737373737373737, -2.272727272727273, -2.1717171717171717, -2.070707070707071, -1.9696969696969697, -1.868686868686869, -1.7676767676767677, -1.6666666666666665, -1.5656565656565657, -1.4646464646464645, -1.3636363636363638, -1.2626262626262625, -1.1616161616161618, -1.0606060606060606, -0.9595959595959593, -0.858585858585859, -0.7575757575757578, -0.6565656565656566, -0.5555555555555554, -0.45454545454545503, -0.3535353535353538, -0.2525252525252526, -0.15151515151515138, -0.050505050505050164, 0.050505050505050164, 0.15151515151515138, 0.2525252525252526, 0.3535353535353538, 0.45454545454545414, 0.5555555555555554, 0.6565656565656566, 0.7575757575757578, 0.8585858585858581, 0.9595959595959593, 1.0606060606060606, 1.1616161616161618, 1.262626262626262, 1.3636363636363633, 1.4646464646464645, 1.5656565656565657, 1.666666666666667, 1.7676767676767673, 1.8686868686868685, 1.9696969696969697, 2.070707070707071, 2.1717171717171713, 2.2727272727272725, 2.3737373737373737, 2.474747474747475, 2.5757575757575752, 2.6767676767676765, 2.7777777777777777, 2.878787878787879, 2.9797979797979792, 3.0808080808080813, 3.1818181818181817, 3.282828282828282, 3.383838383838384, 3.4848484848484844, 3.5858585858585865, 3.686868686868687, 3.787878787878787, 3.8888888888888893, 3.9898989898989896, 4.09090909090909, 4.191919191919192, 4.292929292929292, 4.3939393939393945, 4.494949494949495, 4.595959595959595, 4.696969696969697, 4.797979797979798, 4.8989898989899, 5.0]}, {"text": ["P0", "P1", "P2"], "name": "(p, f(p))", "y": [-1.5403023058681398, -0.982758635480243, -20284.20612963168], "x": [-1, -0.28641111839256095, -27.27238899286746], "type": "scatter", "mode": "markers"}, {"text": ["P0", "P1", "P2"], "name": "p", "y": [0, 0, 0], "x": [-1, -0.28641111839256095, -27.27238899286746], "type": "scatter", "mode": "markers"}], {"xaxis": {"range": [-5, 5]}, "yaxis": {"range": [-20, 20]}}, {"linkText": "Export to plot.ly", "showLink": true})});</script>
+</div>
+
+</div>
+
+<div class="output_area"><div class="prompt output_prompt">Out[5]:</div>
 
 <div class="output_html rendered_html output_subarea output_execute_result">
 
@@ -12110,7 +12208,7 @@ div#notebook {
         
         </style>
 
-        <table id="T_1d758c2e_f782_11e6_9f4a_e0ca948f7d8b" None>
+        <table id="T_ad4adf7a_f7ec_11e6_b2f1_e0ca948f7d8b" None>
         
 
         <thead>
@@ -12128,30 +12226,30 @@ div#notebook {
             
             <tr>
                 
-                <th id="T_1d758c2e_f782_11e6_9f4a_e0ca948f7d8b" class="row_heading level0 row0">
+                <th id="T_ad4adf7a_f7ec_11e6_b2f1_e0ca948f7d8b" class="row_heading level0 row0">
                     0
                 
-                <td id="T_1d758c2e_f782_11e6_9f4a_e0ca948f7d8brow0_col0" class="data row0 col0">
+                <td id="T_ad4adf7a_f7ec_11e6_b2f1_e0ca948f7d8brow0_col0" class="data row0 col0">
                     -1.0
                 
             </tr>
             
             <tr>
                 
-                <th id="T_1d758c2e_f782_11e6_9f4a_e0ca948f7d8b" class="row_heading level0 row1">
+                <th id="T_ad4adf7a_f7ec_11e6_b2f1_e0ca948f7d8b" class="row_heading level0 row1">
                     1
                 
-                <td id="T_1d758c2e_f782_11e6_9f4a_e0ca948f7d8brow1_col0" class="data row1 col0">
+                <td id="T_ad4adf7a_f7ec_11e6_b2f1_e0ca948f7d8brow1_col0" class="data row1 col0">
                     -0.2864111184
                 
             </tr>
             
             <tr>
                 
-                <th id="T_1d758c2e_f782_11e6_9f4a_e0ca948f7d8b" class="row_heading level0 row2">
+                <th id="T_ad4adf7a_f7ec_11e6_b2f1_e0ca948f7d8b" class="row_heading level0 row2">
                     2
                 
-                <td id="T_1d758c2e_f782_11e6_9f4a_e0ca948f7d8brow2_col0" class="data row2 col0">
+                <td id="T_ad4adf7a_f7ec_11e6_b2f1_e0ca948f7d8brow2_col0" class="data row2 col0">
                     -27.27238899
                 
             </tr>
@@ -12275,13 +12373,13 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[58]:</div>
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">sympy</span> <span class="k">import</span> <span class="o">*</span>
 
 <span class="n">x</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
-<span class="n">NewtonsMethod</span><span class="p">(</span><span class="n">p0</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">equation</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="nb">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="mi">5</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">)</span>
+<span class="n">NewtonsMethod</span><span class="p">(</span><span class="n">p0</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">equation</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="nb">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="mi">5</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12292,7 +12390,15 @@ div#notebook {
 <div class="output">
 
 
-<div class="output_area"><div class="prompt output_prompt">Out[58]:</div>
+<div class="output_area"><div class="prompt"></div>
+
+<div class="output_html rendered_html output_subarea ">
+<div id="2c766a39-3588-4053-9c14-a7163884dffc" style="height: 525px; width: 100%;" class="plotly-graph-div"></div><script type="text/javascript">require(["plotly"], function(Plotly) { window.PLOTLYENV=window.PLOTLYENV || {};window.PLOTLYENV.BASE_URL="https://plot.ly";Plotly.newPlot("2c766a39-3588-4053-9c14-a7163884dffc", [{"name": "equation", "type": "scatter", "mode": "lines", "y": [-180.0, -170.57646148249148, -161.49364268127658, -152.7453599354426, -144.32542958407666, -136.22766796626604, -128.445891421098, -120.97391628765982, -113.80555890503857, -106.93463561232156, -100.35496274859602, -94.06035665294924, -88.04463366446839, -82.30161012224067, -76.82510236535335, -71.60892673289368, -66.64689956394886, -61.9328371976061, -57.46055597295266, -53.22387222907578, -49.216602305062665, -45.43256254000056, -41.86556927297668, -38.50943884307827, -35.35798758939255, -32.405031851006754, -29.644387967008107, -27.069872276483856, -24.675301118521197, -22.454490832207398, -20.401257756629658, -18.509418230875227, -16.772788594031326, -15.185185185185183, -13.740424343424039, -12.432322407835109, -11.254695717505637, -10.201360611522839, -9.266133428973957, -8.44283050894621, -7.725268190526836, -7.107262812803066, -6.582630714862121, -6.1451882357912355, -5.788751714677639, -5.507137490608566, -5.294161902671239, -5.143641289952891, -5.049391991540752, -5.005230346522051, -5.004972693984019, -5.042435373013886, -5.111434722698879, -5.205787082126231, -5.31930879038317, -5.445816186556927, -5.579125609734731, -5.713053399003813, -5.8414158934513996, -5.958029432164724, -6.056710354231015, -6.131274998737503, -6.175539704771415, -6.183320811419986, -6.148434657770441, -6.064697582910011, -5.925925925925925, -5.725936025905418, -5.458544221935713, -5.117566853104043, -4.696820258497636, -4.190120777203731, -3.5912847483095423, -2.894128510902309, -2.09246840406926, -1.1801207668976321, -0.1509019384746395, 1.0013717421124824, 2.2828839357764963, 3.6998183034301704, 5.258358505986308, 6.964688204357625, 8.82499105945691, 10.845450732196987, 13.032250883490544, 15.391575174250427, 17.92960726538933, 20.652530817820054, 23.56652949245543, 26.677786950208123, 29.992486851990947, 33.516812858716754, 37.256948631298165, 41.219077830648104, 45.40938411767918, 49.83405115330425, 54.49926259843616, 59.41120211398753, 64.57605336087127, 70.0], "x": [-5.0, -4.898989898989899, -4.797979797979798, -4.696969696969697, -4.595959595959596, -4.494949494949495, -4.393939393939394, -4.292929292929293, -4.191919191919192, -4.090909090909091, -3.9898989898989896, -3.888888888888889, -3.787878787878788, -3.686868686868687, -3.5858585858585856, -3.484848484848485, -3.383838383838384, -3.282828282828283, -3.1818181818181817, -3.080808080808081, -2.9797979797979797, -2.878787878787879, -2.7777777777777777, -2.676767676767677, -2.5757575757575757, -2.474747474747475, -2.3737373737373737, -2.272727272727273, -2.1717171717171717, -2.070707070707071, -1.9696969696969697, -1.868686868686869, -1.7676767676767677, -1.6666666666666665, -1.5656565656565657, -1.4646464646464645, -1.3636363636363638, -1.2626262626262625, -1.1616161616161618, -1.0606060606060606, -0.9595959595959593, -0.858585858585859, -0.7575757575757578, -0.6565656565656566, -0.5555555555555554, -0.45454545454545503, -0.3535353535353538, -0.2525252525252526, -0.15151515151515138, -0.050505050505050164, 0.050505050505050164, 0.15151515151515138, 0.2525252525252526, 0.3535353535353538, 0.45454545454545414, 0.5555555555555554, 0.6565656565656566, 0.7575757575757578, 0.8585858585858581, 0.9595959595959593, 1.0606060606060606, 1.1616161616161618, 1.262626262626262, 1.3636363636363633, 1.4646464646464645, 1.5656565656565657, 1.666666666666667, 1.7676767676767673, 1.8686868686868685, 1.9696969696969697, 2.070707070707071, 2.1717171717171713, 2.2727272727272725, 2.3737373737373737, 2.474747474747475, 2.5757575757575752, 2.6767676767676765, 2.7777777777777777, 2.878787878787879, 2.9797979797979792, 3.0808080808080813, 3.1818181818181817, 3.282828282828282, 3.383838383838384, 3.4848484848484844, 3.5858585858585865, 3.686868686868687, 3.787878787878787, 3.8888888888888893, 3.9898989898989896, 4.09090909090909, 4.191919191919192, 4.292929292929292, 4.3939393939393945, 4.494949494949495, 4.595959595959595, 4.696969696969697, 4.797979797979798, 4.8989898989899, 5.0]}, {"text": ["P0", "P1", "P2", "P3", "P4", "P5"], "name": "(p, f(p))", "y": [-5, 8.203125, 1.4087541771415921, 0.08076844101196201, 0.0003254562850933951, 5.3576165726099134e-09], "x": [2, 3.25, 2.811036789297659, 2.697989502468529, 2.6906771528603617, 2.690647448517619], "type": "scatter", "mode": "markers"}, {"text": ["P0", "P1", "P2", "P3", "P4", "P5"], "name": "p", "y": [0, 0, 0, 0, 0, 0], "x": [2, 3.25, 2.811036789297659, 2.697989502468529, 2.6906771528603617, 2.690647448517619], "type": "scatter", "mode": "markers"}], {"xaxis": {"range": [-5, 5]}, "yaxis": {"range": [-20, 20]}}, {"linkText": "Export to plot.ly", "showLink": true})});</script>
+</div>
+
+</div>
+
+<div class="output_area"><div class="prompt output_prompt">Out[6]:</div>
 
 <div class="output_html rendered_html output_subarea output_execute_result">
 
@@ -12301,7 +12407,7 @@ div#notebook {
         
         </style>
 
-        <table id="T_890707f6_f783_11e6_831a_e0ca948f7d8b" None>
+        <table id="T_b5040850_f7ec_11e6_9e58_e0ca948f7d8b" None>
         
 
         <thead>
@@ -12319,60 +12425,60 @@ div#notebook {
             
             <tr>
                 
-                <th id="T_890707f6_f783_11e6_831a_e0ca948f7d8b" class="row_heading level0 row0">
+                <th id="T_b5040850_f7ec_11e6_9e58_e0ca948f7d8b" class="row_heading level0 row0">
                     0
                 
-                <td id="T_890707f6_f783_11e6_831a_e0ca948f7d8brow0_col0" class="data row0 col0">
+                <td id="T_b5040850_f7ec_11e6_9e58_e0ca948f7d8brow0_col0" class="data row0 col0">
                     2.0
                 
             </tr>
             
             <tr>
                 
-                <th id="T_890707f6_f783_11e6_831a_e0ca948f7d8b" class="row_heading level0 row1">
+                <th id="T_b5040850_f7ec_11e6_9e58_e0ca948f7d8b" class="row_heading level0 row1">
                     1
                 
-                <td id="T_890707f6_f783_11e6_831a_e0ca948f7d8brow1_col0" class="data row1 col0">
+                <td id="T_b5040850_f7ec_11e6_9e58_e0ca948f7d8brow1_col0" class="data row1 col0">
                     3.25
                 
             </tr>
             
             <tr>
                 
-                <th id="T_890707f6_f783_11e6_831a_e0ca948f7d8b" class="row_heading level0 row2">
+                <th id="T_b5040850_f7ec_11e6_9e58_e0ca948f7d8b" class="row_heading level0 row2">
                     2
                 
-                <td id="T_890707f6_f783_11e6_831a_e0ca948f7d8brow2_col0" class="data row2 col0">
+                <td id="T_b5040850_f7ec_11e6_9e58_e0ca948f7d8brow2_col0" class="data row2 col0">
                     2.811036789
                 
             </tr>
             
             <tr>
                 
-                <th id="T_890707f6_f783_11e6_831a_e0ca948f7d8b" class="row_heading level0 row3">
+                <th id="T_b5040850_f7ec_11e6_9e58_e0ca948f7d8b" class="row_heading level0 row3">
                     3
                 
-                <td id="T_890707f6_f783_11e6_831a_e0ca948f7d8brow3_col0" class="data row3 col0">
+                <td id="T_b5040850_f7ec_11e6_9e58_e0ca948f7d8brow3_col0" class="data row3 col0">
                     2.697989502
                 
             </tr>
             
             <tr>
                 
-                <th id="T_890707f6_f783_11e6_831a_e0ca948f7d8b" class="row_heading level0 row4">
+                <th id="T_b5040850_f7ec_11e6_9e58_e0ca948f7d8b" class="row_heading level0 row4">
                     4
                 
-                <td id="T_890707f6_f783_11e6_831a_e0ca948f7d8brow4_col0" class="data row4 col0">
+                <td id="T_b5040850_f7ec_11e6_9e58_e0ca948f7d8brow4_col0" class="data row4 col0">
                     2.690677153
                 
             </tr>
             
             <tr>
                 
-                <th id="T_890707f6_f783_11e6_831a_e0ca948f7d8b" class="row_heading level0 row5">
+                <th id="T_b5040850_f7ec_11e6_9e58_e0ca948f7d8b" class="row_heading level0 row5">
                     5
                 
-                <td id="T_890707f6_f783_11e6_831a_e0ca948f7d8brow5_col0" class="data row5 col0">
+                <td id="T_b5040850_f7ec_11e6_9e58_e0ca948f7d8brow5_col0" class="data row5 col0">
                     2.690647449
                 
             </tr>
@@ -12399,13 +12505,13 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[60]:</div>
+<div class="prompt input_prompt">In&nbsp;[8]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">sympy</span> <span class="k">import</span> <span class="o">*</span>
 
 <span class="n">x</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
-<span class="n">NewtonsMethod</span><span class="p">(</span><span class="n">p0</span><span class="o">=-</span><span class="mi">3</span><span class="p">,</span> <span class="n">equation</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="nb">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">)</span>
+<span class="n">NewtonsMethod</span><span class="p">(</span><span class="n">p0</span><span class="o">=-</span><span class="mi">3</span><span class="p">,</span> <span class="n">equation</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="nb">pow</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12416,7 +12522,15 @@ div#notebook {
 <div class="output">
 
 
-<div class="output_area"><div class="prompt output_prompt">Out[60]:</div>
+<div class="output_area"><div class="prompt"></div>
+
+<div class="output_html rendered_html output_subarea ">
+<div id="d0a4a760-596b-4821-bc61-9471137dbcf2" style="height: 525px; width: 100%;" class="plotly-graph-div"></div><script type="text/javascript">require(["plotly"], function(Plotly) { window.PLOTLYENV=window.PLOTLYENV || {};window.PLOTLYENV.BASE_URL="https://plot.ly";Plotly.newPlot("d0a4a760-596b-4821-bc61-9471137dbcf2", [{"name": "equation", "type": "scatter", "mode": "lines", "y": [-51.0, -46.57595133046617, -42.39059197216527, -38.437738264184546, -34.711206545611205, -31.204813155532463, -27.91237443303558, -24.827706717207803, -21.944626347136307, -19.25694966190833, -16.75849300061114, -14.44307270233196, -12.304505106158004, -10.336606551176494, -8.53319337647467, -6.888081921139772, -5.395088524259023, -4.0480295249196345, -2.8407212622088664, -1.766980075213933, -0.8206223030220627, 0.004535715279519792, 0.7146776406035649, 1.315987133862862, 1.814647855970172, 2.216843467838263, 2.5287576303799124, 2.756574004507888, 2.9064762511349596, 2.9846480311738937, 2.9972730055374672, 2.9505348351384475, 2.8506171808896026, 2.703703703703704, 2.515978064493523, 2.293623924171828, 2.0428249436513894, 1.7697647838449795, 1.4806271056653673, 1.1815955700253218, 0.8788538378376143, 0.5785855700150173, 0.28697442747029567, 0.010204071116223012, -0.24554183813443142, -0.4740796393688945, -0.669225671674401, -0.8247962741381778, -0.9346077858474553, -0.992476545889463, -0.992218893351431, -0.9276511673205889, -0.7925897068841665, -0.5808508511293935, -0.2862509391435024, 0.09739368998628162, 0.5762666971727272, 1.156551743328604, 1.8444324893666766, 2.646092596199726, 3.567715724740517, 4.615485535901821, 5.795585690596397, 7.114199849737036, 8.577511674236497, 10.191704825007552, 11.962962962962969, 13.897469749015501, 16.001408844077957, 18.280963909063082, 20.742318604883653, 23.391656592452414, 26.235161532682184, 29.27901708648571, 32.52940691477576, 35.99251467846507, 39.67452403846649, 43.58161865569272, 47.71998219105657, 52.095798305470765, 56.71525065984818, 61.584522915101424, 66.70979873214335, 72.09726177188682, 77.75309569524444, 83.68348416312914, 89.8946108364535, 96.39265937613041, 103.18381344307272, 110.274256698193, 117.67017280240414, 125.377745416619, 133.40315820175013, 141.75259481871058, 150.43223892841277, 159.44827419176968, 168.8068842696942, 178.51425282309884, 188.5765635128966, 199.0], "x": [-5.0, -4.898989898989899, -4.797979797979798, -4.696969696969697, -4.595959595959596, -4.494949494949495, -4.393939393939394, -4.292929292929293, -4.191919191919192, -4.090909090909091, -3.9898989898989896, -3.888888888888889, -3.787878787878788, -3.686868686868687, -3.5858585858585856, -3.484848484848485, -3.383838383838384, -3.282828282828283, -3.1818181818181817, -3.080808080808081, -2.9797979797979797, -2.878787878787879, -2.7777777777777777, -2.676767676767677, -2.5757575757575757, -2.474747474747475, -2.3737373737373737, -2.272727272727273, -2.1717171717171717, -2.070707070707071, -1.9696969696969697, -1.868686868686869, -1.7676767676767677, -1.6666666666666665, -1.5656565656565657, -1.4646464646464645, -1.3636363636363638, -1.2626262626262625, -1.1616161616161618, -1.0606060606060606, -0.9595959595959593, -0.858585858585859, -0.7575757575757578, -0.6565656565656566, -0.5555555555555554, -0.45454545454545503, -0.3535353535353538, -0.2525252525252526, -0.15151515151515138, -0.050505050505050164, 0.050505050505050164, 0.15151515151515138, 0.2525252525252526, 0.3535353535353538, 0.45454545454545414, 0.5555555555555554, 0.6565656565656566, 0.7575757575757578, 0.8585858585858581, 0.9595959595959593, 1.0606060606060606, 1.1616161616161618, 1.262626262626262, 1.3636363636363633, 1.4646464646464645, 1.5656565656565657, 1.666666666666667, 1.7676767676767673, 1.8686868686868685, 1.9696969696969697, 2.070707070707071, 2.1717171717171713, 2.2727272727272725, 2.3737373737373737, 2.474747474747475, 2.5757575757575752, 2.6767676767676765, 2.7777777777777777, 2.878787878787879, 2.9797979797979792, 3.0808080808080813, 3.1818181818181817, 3.282828282828282, 3.383838383838384, 3.4848484848484844, 3.5858585858585865, 3.686868686868687, 3.787878787878787, 3.8888888888888893, 3.9898989898989896, 4.09090909090909, 4.191919191919192, 4.292929292929292, 4.3939393939393945, 4.494949494949495, 4.595959595959595, 4.696969696969697, 4.797979797979798, 4.8989898989899, 5.0]}, {"text": ["P0", "P1", "P2", "P3"], "name": "(p, f(p))", "y": [-1, -0.07270233196159026, -0.0005038500736809226, -2.4800701936555924e-08], "x": [-3, -2.888888888888889, -2.879451566951567, -2.8793852448366706], "type": "scatter", "mode": "markers"}, {"text": ["P0", "P1", "P2", "P3"], "name": "p", "y": [0, 0, 0, 0], "x": [-3, -2.888888888888889, -2.879451566951567, -2.8793852448366706], "type": "scatter", "mode": "markers"}], {"xaxis": {"range": [-5, 5]}, "yaxis": {"range": [-20, 20]}}, {"linkText": "Export to plot.ly", "showLink": true})});</script>
+</div>
+
+</div>
+
+<div class="output_area"><div class="prompt output_prompt">Out[8]:</div>
 
 <div class="output_html rendered_html output_subarea output_execute_result">
 
@@ -12425,7 +12539,7 @@ div#notebook {
         
         </style>
 
-        <table id="T_d092af24_f783_11e6_a606_e0ca948f7d8b" None>
+        <table id="T_ba0dc292_f7ec_11e6_956e_e0ca948f7d8b" None>
         
 
         <thead>
@@ -12443,40 +12557,40 @@ div#notebook {
             
             <tr>
                 
-                <th id="T_d092af24_f783_11e6_a606_e0ca948f7d8b" class="row_heading level0 row0">
+                <th id="T_ba0dc292_f7ec_11e6_956e_e0ca948f7d8b" class="row_heading level0 row0">
                     0
                 
-                <td id="T_d092af24_f783_11e6_a606_e0ca948f7d8brow0_col0" class="data row0 col0">
+                <td id="T_ba0dc292_f7ec_11e6_956e_e0ca948f7d8brow0_col0" class="data row0 col0">
                     -3.0
                 
             </tr>
             
             <tr>
                 
-                <th id="T_d092af24_f783_11e6_a606_e0ca948f7d8b" class="row_heading level0 row1">
+                <th id="T_ba0dc292_f7ec_11e6_956e_e0ca948f7d8b" class="row_heading level0 row1">
                     1
                 
-                <td id="T_d092af24_f783_11e6_a606_e0ca948f7d8brow1_col0" class="data row1 col0">
+                <td id="T_ba0dc292_f7ec_11e6_956e_e0ca948f7d8brow1_col0" class="data row1 col0">
                     -2.888888889
                 
             </tr>
             
             <tr>
                 
-                <th id="T_d092af24_f783_11e6_a606_e0ca948f7d8b" class="row_heading level0 row2">
+                <th id="T_ba0dc292_f7ec_11e6_956e_e0ca948f7d8b" class="row_heading level0 row2">
                     2
                 
-                <td id="T_d092af24_f783_11e6_a606_e0ca948f7d8brow2_col0" class="data row2 col0">
+                <td id="T_ba0dc292_f7ec_11e6_956e_e0ca948f7d8brow2_col0" class="data row2 col0">
                     -2.879451567
                 
             </tr>
             
             <tr>
                 
-                <th id="T_d092af24_f783_11e6_a606_e0ca948f7d8b" class="row_heading level0 row3">
+                <th id="T_ba0dc292_f7ec_11e6_956e_e0ca948f7d8b" class="row_heading level0 row3">
                     3
                 
-                <td id="T_d092af24_f783_11e6_a606_e0ca948f7d8brow3_col0" class="data row3 col0">
+                <td id="T_ba0dc292_f7ec_11e6_956e_e0ca948f7d8brow3_col0" class="data row3 col0">
                     -2.879385245
                 
             </tr>
@@ -12503,13 +12617,13 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[61]:</div>
+<div class="prompt input_prompt">In&nbsp;[9]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">sympy</span> <span class="k">import</span> <span class="o">*</span>
 
 <span class="n">x</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
-<span class="n">NewtonsMethod</span><span class="p">(</span><span class="n">p0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">equation</span><span class="o">=</span><span class="n">x</span> <span class="o">-</span> <span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">)</span>
+<span class="n">NewtonsMethod</span><span class="p">(</span><span class="n">p0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">equation</span><span class="o">=</span><span class="n">x</span> <span class="o">-</span> <span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12520,7 +12634,15 @@ div#notebook {
 <div class="output">
 
 
-<div class="output_area"><div class="prompt output_prompt">Out[61]:</div>
+<div class="output_area"><div class="prompt"></div>
+
+<div class="output_html rendered_html output_subarea ">
+<div id="ee1ec373-cb3f-411f-b27a-c26eac353f03" style="height: 525px; width: 100%;" class="plotly-graph-div"></div><script type="text/javascript">require(["plotly"], function(Plotly) { window.PLOTLYENV=window.PLOTLYENV || {};window.PLOTLYENV.BASE_URL="https://plot.ly";Plotly.newPlot("ee1ec373-cb3f-411f-b27a-c26eac353f03", [{"name": "equation", "type": "scatter", "mode": "lines", "y": [-5.283662185463227, -5.084509797055185, -4.883466150481822, -4.681551024547599, -4.479793082238532, -4.279219384152878, -4.080844918267138, -3.8856622527748197, -3.694631417480722, -3.508670116903545, -3.3286443748580403, -3.155359705889306, -2.9895529035608464, -2.8318845293096415, -2.6829321784395788, -2.543184591902208, -2.4130366738914795, -2.292785466044957, -2.1826271192919693, -2.0826548942187926, -1.9928582103358903, -1.9131227539393199, -1.8432316434667295, -1.782867640467881, -1.7316163836502445, -1.6889706130306201, -1.6543353411302213, -1.627033918496161, -1.6063149317151746, -1.5913598635986899, -1.581291437448496, -1.575182560338495, -1.5720657742414248, -1.570943118652291, -1.570796304165291, -1.5705970932910376, -1.569317782688212, -1.565941679949915, -1.559473468140496, -1.548949352422957, -1.5334468853384728, -1.5120943705755132, -1.4840797493630729, -1.4486588788968568, -1.4051631184050832, -1.3530061455187625, -1.2916899334578607, -1.2208098280997124, -1.140058673172176, -1.049229941517793, -0.9482198405076927, -0.8370283701418734, -0.7157593230492072, -0.5846192263871529, -0.4439152364278538, -0.2940520072939725, -0.1355275657655437, 0.03107176578844273, 0.20507734659620336, 0.3857450338534457, 0.5722627687891642, 0.7637588550918275, 0.9593108453026091, 1.1579549445845145, 1.3586958360018915, 1.5605168271478405, 1.7623902146810428, 1.9632877611121098, 2.162191177035242, 2.358102501945443, 2.550054277815452, 2.737119411719168, 2.918420626958384, 3.093139406344526, 3.2605243364643295, 3.419898767864906, 3.5706677130674724, 3.712323912088826, 3.844453003636438, 3.9667377492600684, 4.07896126739737, 4.181009244344394, 4.272871099611608, 4.354640093785289, 4.4265123777947615, 4.4887849932775925, 4.541852844427733, 4.586204672196729, 4.622418071888472, 4.651153604939939, 4.673148064914637, 4.689206966357662, 4.700196333083767, 4.707033869611649, 4.710679605746112, 4.71212610968066, 4.712388369391795, 4.712493445477773, 4.713470000924612, 4.716337814536773], "x": [-5.0, -4.898989898989899, -4.797979797979798, -4.696969696969697, -4.595959595959596, -4.494949494949495, -4.393939393939394, -4.292929292929293, -4.191919191919192, -4.090909090909091, -3.9898989898989896, -3.888888888888889, -3.787878787878788, -3.686868686868687, -3.5858585858585856, -3.484848484848485, -3.383838383838384, -3.282828282828283, -3.1818181818181817, -3.080808080808081, -2.9797979797979797, -2.878787878787879, -2.7777777777777777, -2.676767676767677, -2.5757575757575757, -2.474747474747475, -2.3737373737373737, -2.272727272727273, -2.1717171717171717, -2.070707070707071, -1.9696969696969697, -1.868686868686869, -1.7676767676767677, -1.6666666666666665, -1.5656565656565657, -1.4646464646464645, -1.3636363636363638, -1.2626262626262625, -1.1616161616161618, -1.0606060606060606, -0.9595959595959593, -0.858585858585859, -0.7575757575757578, -0.6565656565656566, -0.5555555555555554, -0.45454545454545503, -0.3535353535353538, -0.2525252525252526, -0.15151515151515138, -0.050505050505050164, 0.050505050505050164, 0.15151515151515138, 0.2525252525252526, 0.3535353535353538, 0.45454545454545414, 0.5555555555555554, 0.6565656565656566, 0.7575757575757578, 0.8585858585858581, 0.9595959595959593, 1.0606060606060606, 1.1616161616161618, 1.262626262626262, 1.3636363636363633, 1.4646464646464645, 1.5656565656565657, 1.666666666666667, 1.7676767676767673, 1.8686868686868685, 1.9696969696969697, 2.070707070707071, 2.1717171717171713, 2.2727272727272725, 2.3737373737373737, 2.474747474747475, 2.5757575757575752, 2.6767676767676765, 2.7777777777777777, 2.878787878787879, 2.9797979797979792, 3.0808080808080813, 3.1818181818181817, 3.282828282828282, 3.383838383838384, 3.4848484848484844, 3.5858585858585865, 3.686868686868687, 3.787878787878787, 3.8888888888888893, 3.9898989898989896, 4.09090909090909, 4.191919191919192, 4.292929292929292, 4.3939393939393945, 4.494949494949495, 4.595959595959595, 4.696969696969697, 4.797979797979798, 4.8989898989899, 5.0]}, {"text": ["P0", "P1", "P2", "P3", "P4"], "name": "(p, f(p))", "y": [-1.0, 0.45969769413186035, 0.018923073822117442, 4.6455898990771516e-05, 2.847205804457076e-10], "x": [0, 1.0, 0.7503638678402439, 0.7391128909113617, 0.739085133385284], "type": "scatter", "mode": "markers"}, {"text": ["P0", "P1", "P2", "P3", "P4"], "name": "p", "y": [0, 0, 0, 0, 0], "x": [0, 1.0, 0.7503638678402439, 0.7391128909113617, 0.739085133385284], "type": "scatter", "mode": "markers"}], {"xaxis": {"range": [-5, 5]}, "yaxis": {"range": [-20, 20]}}, {"linkText": "Export to plot.ly", "showLink": true})});</script>
+</div>
+
+</div>
+
+<div class="output_area"><div class="prompt output_prompt">Out[9]:</div>
 
 <div class="output_html rendered_html output_subarea output_execute_result">
 
@@ -12529,7 +12651,7 @@ div#notebook {
         
         </style>
 
-        <table id="T_0c935464_f784_11e6_957a_e0ca948f7d8b" None>
+        <table id="T_be0b8fcc_f7ec_11e6_9621_e0ca948f7d8b" None>
         
 
         <thead>
@@ -12547,50 +12669,50 @@ div#notebook {
             
             <tr>
                 
-                <th id="T_0c935464_f784_11e6_957a_e0ca948f7d8b" class="row_heading level0 row0">
+                <th id="T_be0b8fcc_f7ec_11e6_9621_e0ca948f7d8b" class="row_heading level0 row0">
                     0
                 
-                <td id="T_0c935464_f784_11e6_957a_e0ca948f7d8brow0_col0" class="data row0 col0">
+                <td id="T_be0b8fcc_f7ec_11e6_9621_e0ca948f7d8brow0_col0" class="data row0 col0">
                     0.0
                 
             </tr>
             
             <tr>
                 
-                <th id="T_0c935464_f784_11e6_957a_e0ca948f7d8b" class="row_heading level0 row1">
+                <th id="T_be0b8fcc_f7ec_11e6_9621_e0ca948f7d8b" class="row_heading level0 row1">
                     1
                 
-                <td id="T_0c935464_f784_11e6_957a_e0ca948f7d8brow1_col0" class="data row1 col0">
+                <td id="T_be0b8fcc_f7ec_11e6_9621_e0ca948f7d8brow1_col0" class="data row1 col0">
                     1.0
                 
             </tr>
             
             <tr>
                 
-                <th id="T_0c935464_f784_11e6_957a_e0ca948f7d8b" class="row_heading level0 row2">
+                <th id="T_be0b8fcc_f7ec_11e6_9621_e0ca948f7d8b" class="row_heading level0 row2">
                     2
                 
-                <td id="T_0c935464_f784_11e6_957a_e0ca948f7d8brow2_col0" class="data row2 col0">
+                <td id="T_be0b8fcc_f7ec_11e6_9621_e0ca948f7d8brow2_col0" class="data row2 col0">
                     0.7503638678
                 
             </tr>
             
             <tr>
                 
-                <th id="T_0c935464_f784_11e6_957a_e0ca948f7d8b" class="row_heading level0 row3">
+                <th id="T_be0b8fcc_f7ec_11e6_9621_e0ca948f7d8b" class="row_heading level0 row3">
                     3
                 
-                <td id="T_0c935464_f784_11e6_957a_e0ca948f7d8brow3_col0" class="data row3 col0">
+                <td id="T_be0b8fcc_f7ec_11e6_9621_e0ca948f7d8brow3_col0" class="data row3 col0">
                     0.7391128909
                 
             </tr>
             
             <tr>
                 
-                <th id="T_0c935464_f784_11e6_957a_e0ca948f7d8b" class="row_heading level0 row4">
+                <th id="T_be0b8fcc_f7ec_11e6_9621_e0ca948f7d8b" class="row_heading level0 row4">
                     4
                 
-                <td id="T_0c935464_f784_11e6_957a_e0ca948f7d8brow4_col0" class="data row4 col0">
+                <td id="T_be0b8fcc_f7ec_11e6_9621_e0ca948f7d8brow4_col0" class="data row4 col0">
                     0.7390851334
                 
             </tr>
@@ -12617,13 +12739,13 @@ div#notebook {
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[73]:</div>
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">sympy</span> <span class="k">import</span> <span class="o">*</span>
 
 <span class="n">x</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
-<span class="n">NewtonsMethod</span><span class="p">(</span><span class="n">p0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">equation</span><span class="o">=</span><span class="n">x</span> <span class="o">-</span> <span class="mf">0.8</span> <span class="o">-</span> <span class="mf">0.2</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">)</span>
+<span class="n">NewtonsMethod</span><span class="p">(</span><span class="n">p0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">equation</span><span class="o">=</span><span class="n">x</span> <span class="o">-</span> <span class="mf">0.8</span> <span class="o">-</span> <span class="mf">0.2</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">4</span><span class="p">),</span> <span class="n">output</span><span class="o">=</span><span class="s2">&quot;table&quot;</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 
 </div>
@@ -12634,7 +12756,15 @@ div#notebook {
 <div class="output">
 
 
-<div class="output_area"><div class="prompt output_prompt">Out[73]:</div>
+<div class="output_area"><div class="prompt"></div>
+
+<div class="output_html rendered_html output_subarea ">
+<div id="28f88118-9384-4a29-a34f-745bf8d2cfad" style="height: 525px; width: 100%;" class="plotly-graph-div"></div><script type="text/javascript">require(["plotly"], function(Plotly) { window.PLOTLYENV=window.PLOTLYENV || {};window.PLOTLYENV.BASE_URL="https://plot.ly";Plotly.newPlot("28f88118-9384-4a29-a34f-745bf8d2cfad", [{"name": "equation", "type": "scatter", "mode": "lines", "y": [-5.991784854932628, -5.895518000534879, -5.797247666291365, -5.6969459220106495, -5.594605546443354, -5.490240100898237, -5.383883790993218, -5.275591117950705, -5.1654363229920675, -5.053512630495284, -4.939931297631297, -4.824820480167438, -4.708323926000338, -4.590599509736926, -4.471817623262551, -4.352159438703341, -4.231815061490829, -4.110981592357174, -3.989861118017701, -3.8686586510245076, -3.747580039792996, -3.6268298701073234, -3.5066093794975646, -3.3871144057502236, -3.2685333904657092, -3.151045458015263, -3.0348185894811475, -2.920007910195631, -2.806754108336217, -2.6951820006985514, -2.585399260268037, -2.4774953185617714, -2.3715404539307166, -2.2675850751163136, -2.165659207365206, -2.0657721863408156, -1.967912562952153, -1.872048220070067, -1.778126699941089, -1.686075738961088, -1.5958040043570698, -1.507202025267097, -1.4201433087265727, -1.3344856291841105, -1.2500724784011823, -1.1667346609547429, -1.0842920190776821, -1.002555269253457, -0.9213279318419668, -0.8404083340653657, -0.7595916659346343, -0.6786720681580333, -0.597444730746543, -0.515707980922318, -0.433265339045258, -0.3499275215988178, -0.26551437081588947, -0.1798566912734274, -0.09279797473290385, -0.0041959956429302725, 0.08607573896108811, 0.17812669994108876, 0.27204822007006635, 0.36791256295215236, 0.4657721863408153, 0.565659207365206, 0.6675850751163139, 0.7715404539307158, 0.8774953185617709, 0.9853992602680373, 1.095182000698551, 1.206754108336216, 1.3200079101956306, 1.4348185894811474, 1.5510454580152628, 1.6685333904657085, 1.787114405750223, 1.9066093794975645, 2.0268298701073233, 2.1475800397929956, 2.268658651024508, 2.3898611180177007, 2.5109815923571723, 2.6318150614908293, 2.75215943870334, 2.8718176232625514, 2.990599509736926, 3.1083239260003364, 3.2248204801674385, 3.3399312976312974, 3.4535126304952835, 3.565436322992067, 3.6755911179507033, 3.783883790993218, 3.8902401008982377, 3.9946055464433536, 4.09694592201065, 4.197247666291364, 4.295518000534879, 4.391784854932627], "x": [-5.0, -4.898989898989899, -4.797979797979798, -4.696969696969697, -4.595959595959596, -4.494949494949495, -4.393939393939394, -4.292929292929293, -4.191919191919192, -4.090909090909091, -3.9898989898989896, -3.888888888888889, -3.787878787878788, -3.686868686868687, -3.5858585858585856, -3.484848484848485, -3.383838383838384, -3.282828282828283, -3.1818181818181817, -3.080808080808081, -2.9797979797979797, -2.878787878787879, -2.7777777777777777, -2.676767676767677, -2.5757575757575757, -2.474747474747475, -2.3737373737373737, -2.272727272727273, -2.1717171717171717, -2.070707070707071, -1.9696969696969697, -1.868686868686869, -1.7676767676767677, -1.6666666666666665, -1.5656565656565657, -1.4646464646464645, -1.3636363636363638, -1.2626262626262625, -1.1616161616161618, -1.0606060606060606, -0.9595959595959593, -0.858585858585859, -0.7575757575757578, -0.6565656565656566, -0.5555555555555554, -0.45454545454545503, -0.3535353535353538, -0.2525252525252526, -0.15151515151515138, -0.050505050505050164, 0.050505050505050164, 0.15151515151515138, 0.2525252525252526, 0.3535353535353538, 0.45454545454545414, 0.5555555555555554, 0.6565656565656566, 0.7575757575757578, 0.8585858585858581, 0.9595959595959593, 1.0606060606060606, 1.1616161616161618, 1.262626262626262, 1.3636363636363633, 1.4646464646464645, 1.5656565656565657, 1.666666666666667, 1.7676767676767673, 1.8686868686868685, 1.9696969696969697, 2.070707070707071, 2.1717171717171713, 2.2727272727272725, 2.3737373737373737, 2.474747474747475, 2.5757575757575752, 2.6767676767676765, 2.7777777777777777, 2.878787878787879, 2.9797979797979792, 3.0808080808080813, 3.1818181818181817, 3.282828282828282, 3.383838383838384, 3.4848484848484844, 3.5858585858585865, 3.686868686868687, 3.787878787878787, 3.8888888888888893, 3.9898989898989896, 4.09090909090909, 4.191919191919192, 4.292929292929292, 4.3939393939393945, 4.494949494949495, 4.595959595959595, 4.696969696969697, 4.797979797979798, 4.8989898989899, 5.0]}, {"text": ["P0", "P1", "P2", "P3", "P4"], "name": "(p, f(p))", "y": [-0.8, 0.03170580303842063, 0.0001055074531769451, 1.1651818399016634e-09, 0.0], "x": [0, 1.0, 0.9644529683254768, 0.9643338890103158, 0.9643338876952228], "type": "scatter", "mode": "markers"}, {"text": ["P0", "P1", "P2", "P3", "P4"], "name": "p", "y": [0, 0, 0, 0, 0], "x": [0, 1.0, 0.9644529683254768, 0.9643338890103158, 0.9643338876952228], "type": "scatter", "mode": "markers"}], {"xaxis": {"range": [-5, 5]}, "yaxis": {"range": [-20, 20]}}, {"linkText": "Export to plot.ly", "showLink": true})});</script>
+</div>
+
+</div>
+
+<div class="output_area"><div class="prompt output_prompt">Out[10]:</div>
 
 <div class="output_html rendered_html output_subarea output_execute_result">
 
@@ -12643,7 +12773,7 @@ div#notebook {
         
         </style>
 
-        <table id="T_1f16c142_f785_11e6_9cca_e0ca948f7d8b" None>
+        <table id="T_c120efae_f7ec_11e6_bec4_e0ca948f7d8b" None>
         
 
         <thead>
@@ -12661,50 +12791,50 @@ div#notebook {
             
             <tr>
                 
-                <th id="T_1f16c142_f785_11e6_9cca_e0ca948f7d8b" class="row_heading level0 row0">
+                <th id="T_c120efae_f7ec_11e6_bec4_e0ca948f7d8b" class="row_heading level0 row0">
                     0
                 
-                <td id="T_1f16c142_f785_11e6_9cca_e0ca948f7d8brow0_col0" class="data row0 col0">
+                <td id="T_c120efae_f7ec_11e6_bec4_e0ca948f7d8brow0_col0" class="data row0 col0">
                     0.0
                 
             </tr>
             
             <tr>
                 
-                <th id="T_1f16c142_f785_11e6_9cca_e0ca948f7d8b" class="row_heading level0 row1">
+                <th id="T_c120efae_f7ec_11e6_bec4_e0ca948f7d8b" class="row_heading level0 row1">
                     1
                 
-                <td id="T_1f16c142_f785_11e6_9cca_e0ca948f7d8brow1_col0" class="data row1 col0">
+                <td id="T_c120efae_f7ec_11e6_bec4_e0ca948f7d8brow1_col0" class="data row1 col0">
                     1.0
                 
             </tr>
             
             <tr>
                 
-                <th id="T_1f16c142_f785_11e6_9cca_e0ca948f7d8b" class="row_heading level0 row2">
+                <th id="T_c120efae_f7ec_11e6_bec4_e0ca948f7d8b" class="row_heading level0 row2">
                     2
                 
-                <td id="T_1f16c142_f785_11e6_9cca_e0ca948f7d8brow2_col0" class="data row2 col0">
+                <td id="T_c120efae_f7ec_11e6_bec4_e0ca948f7d8brow2_col0" class="data row2 col0">
                     0.9644529683
                 
             </tr>
             
             <tr>
                 
-                <th id="T_1f16c142_f785_11e6_9cca_e0ca948f7d8b" class="row_heading level0 row3">
+                <th id="T_c120efae_f7ec_11e6_bec4_e0ca948f7d8b" class="row_heading level0 row3">
                     3
                 
-                <td id="T_1f16c142_f785_11e6_9cca_e0ca948f7d8brow3_col0" class="data row3 col0">
+                <td id="T_c120efae_f7ec_11e6_bec4_e0ca948f7d8brow3_col0" class="data row3 col0">
                     0.964333889
                 
             </tr>
             
             <tr>
                 
-                <th id="T_1f16c142_f785_11e6_9cca_e0ca948f7d8b" class="row_heading level0 row4">
+                <th id="T_c120efae_f7ec_11e6_bec4_e0ca948f7d8b" class="row_heading level0 row4">
                     4
                 
-                <td id="T_1f16c142_f785_11e6_9cca_e0ca948f7d8brow4_col0" class="data row4 col0">
+                <td id="T_c120efae_f7ec_11e6_bec4_e0ca948f7d8brow4_col0" class="data row4 col0">
                     0.9643338877
                 
             </tr>
